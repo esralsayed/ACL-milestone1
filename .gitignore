@@ -1,0 +1,12 @@
+# Virtual environment (hundreds of files, rebuilt with pip)
+.venv/
+
+# Python cache and notebook checkpoints
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Editor and system files
+.vscode/
+.DS_Store
+Thumbs.db

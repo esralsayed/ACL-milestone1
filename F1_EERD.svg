@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1720" viewBox="0 0 1900 1720" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .tot   { fill: none; stroke: #334155; stroke-width: 6.5; }
+    .totin { fill: none; stroke: #ffffff; stroke-width: 2.2; }
+    .par   { fill: none; stroke: #334155; stroke-width: 1.7; }
+    .box   { stroke-width: 1.8; }
+    .dash  { stroke-dasharray: 7 4; }
+    .spine { fill: #dbeafe; stroke: #1e40af; }
+    .grain { fill: #ccfbf1; stroke: #0f766e; stroke-width: 3; }
+    .pre   { fill: #dcfce7; stroke: #15803d; }
+    .lag   { fill: #fef3c7; stroke: #b45309; }
+    .qonly { fill: #ede9fe; stroke: #6d28d9; }
+    .post  { fill: #e5e7eb; stroke: #4b5563; }
+    .neut  { fill: #ffffff; stroke: #334155; }
+    .rel   { fill: #ffffff; stroke: #334155; stroke-width: 1.7; }
+    .name  { font-size: 13.5px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+    .attr  { font-size: 11px; fill: #334155; text-anchor: middle; }
+    .rlbl  { font-size: 10.5px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+    .card  { font-size: 12px; font-weight: 700; fill: #9f1239; }
+    .note  { font-size: 10.5px; font-style: italic; fill: #475569; }
+    .circ  { fill: #ffffff; stroke: #334155; stroke-width: 1.8; }
+    .ctxt  { font-size: 14px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+    .ptitle{ font-size: 15px; font-weight: 700; fill: #0f172a; }
+    .ltxt  { font-size: 12px; fill: #1e293b; }
+  </style>
+
+  <rect width="1900" height="1720" fill="#ffffff"/>
+
+  <!-- ======================= TITLE ======================= -->
+  <text x="30" y="42" font-size="24" font-weight="700" fill="#0f172a">F1 Podium Project · EERD</text>
+  <text x="30" y="66" font-size="13" fill="#334155">Conceptual model of the 14 CSVs (1950–2024)</text>
+  <text x="30" y="86" font-size="13" fill="#334155">(min,max) participation · colour = how each table is used</text>
+
+  <!-- ======================= CONNECTORS (drawn first, shapes cover the ends) ======================= -->
+  <!-- total participation = double line (thick dark + thin white) -->
+  <g>
+    <!-- SEASON - IN_SEASON - RACE -->
+    <path class="tot" d="M170 280 L780 280"/><path class="totin" d="M170 280 L780 280"/>
+    <!-- RACE - HELD_AT - CIRCUIT -->
+    <path class="tot" d="M780 280 L1400 280"/><path class="totin" d="M780 280 L1400 280"/>
+    <!-- RACE - ENTERED_IN - ENTRY -->
+    <path class="tot" d="M780 280 L780 560"/><path class="totin" d="M780 280 L780 560"/>
+    <!-- DRIVER - TAKES_PART - ENTRY -->
+    <path class="tot" d="M170 560 L780 560"/><path class="totin" d="M170 560 L780 560"/>
+    <!-- ENTRY - DRIVES_FOR -->
+    <path class="tot" d="M780 560 L1090 560"/><path class="totin" d="M780 560 L1090 560"/>
+    <!-- DRIVER_STANDING - RANKS ; DRIVER_STANDING - AFTER - RACE -->
+    <path class="tot" d="M170 410 L170 485"/><path class="totin" d="M170 410 L170 485"/>
+    <path class="tot" d="M170 410 L475 410 L780 280"/><path class="totin" d="M170 410 L475 410 L780 280"/>
+    <!-- CONSTRUCTOR_STANDING - RANKS ; CONSTRUCTOR_STANDING - AFTER -->
+    <path class="tot" d="M1400 410 L1400 485"/><path class="totin" d="M1400 410 L1400 485"/>
+    <path class="tot" d="M1400 410 L1090 410"/><path class="totin" d="M1400 410 L1090 410"/>
+    <!-- CONSTRUCTOR_RESULT - OF ; CONSTRUCTOR_RESULT - SCORED_IN -->
+    <path class="tot" d="M1720 410 L1720 485"/><path class="totin" d="M1720 410 L1720 485"/>
+    <path class="tot" d="M1720 410 L1720 195 L1300 195"/><path class="totin" d="M1720 410 L1720 195 L1300 195"/>
+    <!-- HAS_LAP - LAP_TIME ; HAS_STOP - PIT_STOP -->
+    <path class="tot" d="M475 700 L170 700"/><path class="totin" d="M475 700 L170 700"/>
+    <path class="tot" d="M475 820 L170 820"/><path class="totin" d="M475 820 L170 820"/>
+    <!-- ENTRY - RECORDS - SESSION_RESULT -->
+    <path class="tot" d="M850 560 L850 680 L1090 680 L1090 790"/><path class="totin" d="M850 560 L850 680 L1090 680 L1090 790"/>
+    <!-- SESSION_RESULT - specialization circle -->
+    <path class="tot" d="M1090 790 L1090 880"/><path class="totin" d="M1090 790 L1090 880"/>
+    <!-- SPRINT_RESULT - ENDED_AS ; RACE_RESULT - ENDED_AS -->
+    <path class="tot" d="M1380 990 L1570 990"/><path class="totin" d="M1380 990 L1570 990"/>
+    <path class="tot" d="M1150 990 L1150 1110 L1570 1110"/><path class="totin" d="M1150 990 L1150 1110 L1570 1110"/>
+    <!-- RACE_RESULT - specialization circle -->
+    <path class="tot" d="M1030 990 L1030 1110"/><path class="totin" d="M1030 990 L1030 1110"/>
+  </g>
+
+  <!-- partial participation = single line -->
+  <g>
+    <path class="par" d="M1090 560 L1400 560"/>                 <!-- DRIVES_FOR - CONSTRUCTOR -->
+    <path class="par" d="M170 485 L170 560"/>                   <!-- RANKS - DRIVER -->
+    <path class="par" d="M1400 485 L1400 560"/>                 <!-- RANKS - CONSTRUCTOR -->
+    <path class="par" d="M1090 410 L780 280"/>                  <!-- AFTER - RACE (constructor standings) -->
+    <path class="par" d="M1720 485 L1720 560 L1400 560"/>       <!-- OF - CONSTRUCTOR -->
+    <path class="par" d="M1300 195 L850 195 L850 280"/>         <!-- SCORED_IN - RACE -->
+    <path class="par" d="M705 560 L705 700 L475 700"/>          <!-- ENTRY - HAS_LAP -->
+    <path class="par" d="M740 560 L740 820 L475 820"/>          <!-- ENTRY - HAS_STOP -->
+    <path class="par" d="M1570 990 L1760 1050"/>                <!-- ENDED_AS - STATUS (sprint) -->
+    <path class="par" d="M1570 1110 L1760 1050"/>               <!-- ENDED_AS - STATUS (race) -->
+    <!-- specialization lines -->
+    <path class="par" d="M780 280 L780 165"/>                   <!-- RACE - circle (partial) -->
+    <path class="par" d="M780 165 L630 70"/>
+    <path class="par" d="M780 165 L930 70"/>
+    <path class="par" d="M1090 880 L800 990"/>
+    <path class="par" d="M1090 880 L1090 990"/>
+    <path class="par" d="M1090 880 L1380 990"/>
+    <path class="par" d="M1030 1110 L900 1220"/>
+    <path class="par" d="M1030 1110 L1160 1220"/>
+  </g>
+
+  <!-- ======================= RELATIONSHIP DIAMONDS ======================= -->
+  <!-- regular: half-width 60, half-height 25 -->
+  <g>
+    <polygon class="rel" points="415,280 475,255 535,280 475,305"/><text class="rlbl" x="475" y="284">IN_SEASON</text>
+    <polygon class="rel" points="1030,280 1090,255 1150,280 1090,305"/><text class="rlbl" x="1090" y="284">HELD_AT</text>
+    <polygon class="rel" points="1030,560 1090,535 1150,560 1090,585"/><text class="rlbl" x="1090" y="564">DRIVES_FOR</text>
+    <polygon class="rel" points="415,410 475,385 535,410 475,435"/><text class="rlbl" x="475" y="414">AFTER</text>
+    <polygon class="rel" points="1030,410 1090,385 1150,410 1090,435"/><text class="rlbl" x="1090" y="414">AFTER</text>
+    <polygon class="rel" points="120,485 170,462 220,485 170,508"/><text class="rlbl" x="170" y="489">RANKS</text>
+    <polygon class="rel" points="1350,485 1400,462 1450,485 1400,508"/><text class="rlbl" x="1400" y="489">RANKS</text>
+    <polygon class="rel" points="1670,485 1720,462 1770,485 1720,508"/><text class="rlbl" x="1720" y="489">OF</text>
+    <polygon class="rel" points="1240,195 1300,170 1360,195 1300,220"/><text class="rlbl" x="1300" y="199">SCORED_IN</text>
+    <polygon class="rel" points="1030,680 1090,655 1150,680 1090,705"/><text class="rlbl" x="1090" y="684">RECORDS</text>
+    <polygon class="rel" points="1510,990 1570,965 1630,990 1570,1015"/><text class="rlbl" x="1570" y="994">ENDED_AS</text>
+    <polygon class="rel" points="1510,1110 1570,1085 1630,1110 1570,1135"/><text class="rlbl" x="1570" y="1114">ENDED_AS</text>
+  </g>
+  <!-- identifying: double diamond -->
+  <g>
+    <polygon class="rel" points="715,420 780,393 845,420 780,447"/><polygon class="rel" points="725,420 780,398 835,420 780,442"/><text class="rlbl" x="780" y="424">ENTERED_IN</text>
+    <polygon class="rel" points="410,560 475,533 540,560 475,587"/><polygon class="rel" points="420,560 475,538 530,560 475,582"/><text class="rlbl" x="475" y="564">TAKES_PART</text>
+    <polygon class="rel" points="410,700 475,673 540,700 475,727"/><polygon class="rel" points="420,700 475,678 530,700 475,722"/><text class="rlbl" x="475" y="704">HAS_LAP</text>
+    <polygon class="rel" points="410,820 475,793 540,820 475,847"/><polygon class="rel" points="420,820 475,798 530,820 475,842"/><text class="rlbl" x="475" y="824">HAS_STOP</text>
+  </g>
+
+  <!-- ======================= SPECIALIZATION CIRCLES ======================= -->
+  <circle class="circ" cx="780" cy="165" r="16"/><text class="ctxt" x="780" y="170">d</text>
+  <circle class="circ" cx="1090" cy="880" r="16"/><text class="ctxt" x="1090" y="885">d</text>
+  <circle class="circ" cx="1030" cy="1110" r="16"/><text class="ctxt" x="1030" y="1115">d</text>
+
+  <!-- ======================= ENTITIES ======================= -->
+  <!-- RACE subclasses -->
+  <rect class="box spine dash" x="535" y="45" width="190" height="50" rx="3"/>
+  <text class="name" x="630" y="66">SPRINT_WEEKEND</text><text class="attr" x="630" y="83">sprint_date not null · 18 races</text>
+  <rect class="box spine dash" x="835" y="45" width="190" height="50" rx="3"/>
+  <text class="name" x="930" y="66">INDY_500</text><text class="attr" x="930" y="83">Indianapolis 500 · 11 races</text>
+
+  <!-- SEASON -->
+  <rect class="box spine" x="70" y="251" width="200" height="58" rx="3"/>
+  <text class="name" x="170" y="275">SEASON</text><text class="attr" x="170" y="293">PK year · 75 rows</text>
+  <!-- RACE -->
+  <rect class="box spine" x="680" y="251" width="200" height="58" rx="3"/>
+  <text class="name" x="780" y="275">RACE</text><text class="attr" x="780" y="293">PK raceId · year, round, date</text>
+  <!-- CIRCUIT -->
+  <rect class="box spine" x="1300" y="251" width="200" height="58" rx="3"/>
+  <text class="name" x="1400" y="275">CIRCUIT</text><text class="attr" x="1400" y="293">PK circuitId · country</text>
+
+  <!-- DRIVER_STANDING -->
+  <text class="note" x="60" y="374">subclass of STANDING → Panel B</text>
+  <rect class="box lag" x="60" y="381" width="220" height="58" rx="3"/>
+  <text class="name" x="170" y="405">DRIVER_STANDING</text><text class="attr" x="170" y="423">points, rank, wins AFTER race</text>
+  <!-- CONSTRUCTOR_STANDING -->
+  <text class="note" x="1290" y="374">subclass of STANDING → Panel B</text>
+  <rect class="box lag" x="1290" y="381" width="220" height="58" rx="3"/>
+  <text class="name" x="1400" y="405">CONSTRUCTOR_STANDING</text><text class="attr" x="1400" y="423">team totals AFTER race · 1958+</text>
+  <!-- CONSTRUCTOR_RESULT -->
+  <rect class="box lag" x="1610" y="381" width="220" height="58" rx="3"/>
+  <text class="name" x="1720" y="405">CONSTRUCTOR_RESULT</text><text class="attr" x="1720" y="423">team points in one race · 1958+</text>
+
+  <!-- DRIVER -->
+  <rect class="box spine" x="70" y="531" width="200" height="58" rx="3"/>
+  <text class="name" x="170" y="555">DRIVER</text><text class="attr" x="170" y="573">PK driverId · nationality, dob</text>
+  <!-- ENTRY (weak, conceptual) -->
+  <rect class="box grain" x="676" y="521" width="208" height="78" rx="3"/>
+  <rect fill="none" stroke="#0f766e" stroke-width="1.5" x="681" y="526" width="198" height="68" rx="2"/>
+  <text class="name" x="780" y="546">ENTRY</text>
+  <text class="attr" x="780" y="563">driver in a race · key raceId+driverId</text>
+  <text class="attr" x="780" y="580" font-weight="700" fill="#0f766e">= one modeling-table row (no CSV)</text>
+  <!-- CONSTRUCTOR -->
+  <rect class="box spine" x="1300" y="531" width="200" height="58" rx="3"/>
+  <text class="name" x="1400" y="555">CONSTRUCTOR</text><text class="attr" x="1400" y="573">PK constructorId · name</text>
+
+  <!-- LAP_TIME (weak) -->
+  <rect class="box post" x="70" y="671" width="200" height="58" rx="3"/>
+  <rect fill="none" stroke="#4b5563" stroke-width="1.3" x="75" y="676" width="190" height="48" rx="2"/>
+  <text class="name" x="170" y="696">LAP_TIME</text><text class="attr" x="170" y="713">partial key lap · 1996+</text>
+  <!-- PIT_STOP (weak) -->
+  <rect class="box post" x="70" y="791" width="200" height="58" rx="3"/>
+  <rect fill="none" stroke="#4b5563" stroke-width="1.3" x="75" y="796" width="190" height="48" rx="2"/>
+  <text class="name" x="170" y="816">PIT_STOP</text><text class="attr" x="170" y="833">partial key stop · 2011+</text>
+
+  <!-- SESSION_RESULT superclass -->
+  <rect class="box neut" x="980" y="761" width="220" height="58" rx="3"/>
+  <text class="name" x="1090" y="785">SESSION_RESULT</text><text class="attr" x="1090" y="803">constructorId, number, position</text>
+  <!-- subclasses -->
+  <rect class="box pre" x="700" y="961" width="200" height="58" rx="3"/>
+  <text class="name" x="800" y="985">QUALIFYING_RESULT</text><text class="attr" x="800" y="1003">q1, q2, q3 lap times · 1994+</text>
+  <rect class="box lag" x="990" y="961" width="200" height="58" rx="3"/>
+  <text class="name" x="1090" y="985">RACE_RESULT</text><text class="attr" x="1090" y="1003">grid · positionOrder = TARGET</text>
+  <rect class="box pre dash" x="1280" y="961" width="200" height="58" rx="3"/>
+  <text class="name" x="1380" y="985">SPRINT_RESULT</text><text class="attr" x="1380" y="1003">18 races · 2021–2024</text>
+
+  <!-- STATUS -->
+  <rect class="box qonly" x="1660" y="1021" width="200" height="58" rx="3"/>
+  <text class="name" x="1760" y="1045">STATUS</text><text class="attr" x="1760" y="1063">PK statusId · reason race ended</text>
+  <text class="note" x="1860" y="1128" text-anchor="end">categories → Panel C</text>
+
+  <!-- RACE_RESULT subclasses -->
+  <rect class="box neut dash" x="805" y="1195" width="190" height="54" rx="3"/>
+  <text class="name" x="900" y="1217">STARTER</text><text class="attr" x="900" y="1235">took the start (grid&gt;0 or laps&gt;0)*</text>
+  <rect class="box neut dash" x="1065" y="1195" width="190" height="54" rx="3"/>
+  <text class="name" x="1160" y="1217">NON_STARTER</text><text class="attr" x="1160" y="1235">DNQ, DNPQ, withdrew, 107%</text>
+
+  <!-- ======================= CARDINALITIES (min,max) ======================= -->
+  <g class="card">
+    <text x="280" y="270">(1,N)</text>
+    <text x="674" y="270" text-anchor="end">(1,1)</text>
+    <text x="886" y="270">(1,1)</text>
+    <text x="1294" y="270" text-anchor="end">(1,N)</text>
+    <text x="790" y="334">(1,N)</text>
+    <text x="790" y="514">(1,1)</text>
+    <text x="280" y="550">(1,N)</text>
+    <text x="672" y="550" text-anchor="end">(1,1)</text>
+    <text x="890" y="550">(1,1)</text>
+    <text x="1294" y="550" text-anchor="end">(0,N)</text>
+    <text x="160" y="456" text-anchor="end">(1,1)</text>
+    <text x="160" y="526" text-anchor="end">(0,N)</text>
+    <text x="288" y="400">(1,1)</text>
+    <text x="652" y="330" text-anchor="end">(1,N)</text>
+    <text x="1390" y="456" text-anchor="end">(1,1)</text>
+    <text x="1390" y="526" text-anchor="end">(0,N)</text>
+    <text x="1282" y="400" text-anchor="end">(1,1)</text>
+    <text x="912" y="334">(0,N)</text>
+    <text x="1710" y="456" text-anchor="end">(1,1)</text>
+    <text x="1508" y="550">(0,N)</text>
+    <text x="1728" y="372">(1,1)</text>
+    <text x="858" y="240">(0,N)</text>
+    <text x="698" y="618" text-anchor="end">(0,N)</text>
+    <text x="280" y="690">(1,1)</text>
+    <text x="748" y="640">(0,N)</text>
+    <text x="280" y="810">(1,1)</text>
+    <text x="858" y="618">(1,N)†</text>
+    <text x="1098" y="752">(1,1)</text>
+    <text x="1486" y="978">(1,1)</text>
+    <text x="1668" y="1010">(0,N)</text>
+    <text x="1158" y="1042">(1,1)</text>
+    <text x="1668" y="1104">(0,N)</text>
+  </g>
+
+  <!-- footnotes in main area -->
+  <text class="note" x="805" y="1272">* exact definition of "starter" to be confirmed in EDA (decision pending)</text>
+  <text class="note" x="805" y="1290">† raw CSV: 1..N race results per entry (shared drives); exactly 1 after de-duplication</text>
+
+  <!-- ======================= LEGEND ======================= -->
+  <rect x="30" y="890" width="570" height="400" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text class="ptitle" x="50" y="918">How to read this diagram</text>
+  <!-- notation column -->
+  <rect class="box neut" x="50" y="934" width="70" height="30" rx="3"/><text class="ltxt" x="132" y="954">Entity (one CSV table)</text>
+  <rect class="box neut" x="50" y="976" width="70" height="30" rx="3"/><rect fill="none" stroke="#334155" stroke-width="1.2" x="54" y="980" width="62" height="22"/><text class="ltxt" x="132" y="996">Weak entity (no own key)</text>
+  <polygon class="rel" points="50,1033 85,1018 120,1033 85,1048"/><text class="ltxt" x="132" y="1037">Relationship</text>
+  <polygon class="rel" points="50,1075 85,1060 120,1075 85,1090"/><polygon class="rel" points="58,1075 85,1064 112,1075 85,1086"/><text class="ltxt" x="132" y="1079">Identifying relationship</text>
+  <path class="tot" d="M50 1112 L120 1112"/><path class="totin" d="M50 1112 L120 1112"/><text class="ltxt" x="132" y="1116">Total: every row takes part</text>
+  <path class="par" d="M50 1144 L120 1144"/><text class="ltxt" x="132" y="1148">Partial: some rows take part</text>
+  <circle class="circ" cx="85" cy="1180" r="13"/><text class="ctxt" x="85" y="1185">d</text><text class="ltxt" x="132" y="1184">Specialization, disjoint</text>
+  <text class="card" x="50" y="1222">(min,max)</text><text class="ltxt" x="132" y="1222">times each row of the</text>
+  <text class="ltxt" x="132" y="1238">nearest entity takes part</text>
+  <rect class="box neut dash" x="50" y="1252" width="70" height="24" rx="3"/><text class="ltxt" x="132" y="1269">Use depends on a pending decision</text>
+  <!-- colour column -->
+  <text class="ltxt" x="380" y="928" font-weight="700">Colour = how the table is used</text>
+  <rect class="box spine" x="380" y="942" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="958">Spine / lookup (join keys)</text>
+  <rect class="box grain" x="380" y="976" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="992">Modeling grain (ENTRY)</text>
+  <rect class="box pre" x="380" y="1010" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="1026">Pre-race features</text>
+  <rect class="box lag" x="380" y="1044" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="1060">Target, or past races only</text>
+  <rect class="box qonly" x="380" y="1078" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="1094">Cleaning / Q3 only</text>
+  <rect class="box post" x="380" y="1112" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="1128">Post-race: never a feature</text>
+  <rect class="box neut" x="380" y="1146" width="34" height="22" rx="3"/><text class="ltxt" x="424" y="1162">Conceptual super/subclass</text>
+  <text class="note" x="380" y="1196">Lines meet at diamonds; the</text>
+  <text class="note" x="380" y="1212">label next to an entity is that</text>
+  <text class="note" x="380" y="1228">entity's (min,max).</text>
+
+  <!-- ======================= PANEL B: STANDING generalization ======================= -->
+  <rect x="30" y="1320" width="570" height="380" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text class="ptitle" x="50" y="1348">Panel B · Generalization: STANDING</text>
+  <path class="tot" d="M315 1400 L315 1490"/><path class="totin" d="M315 1400 L315 1490"/>
+  <path class="par" d="M315 1490 L175 1561"/><path class="par" d="M315 1490 L455 1561"/>
+  <rect class="box neut" x="195" y="1371" width="240" height="58" rx="3"/>
+  <text class="name" x="315" y="1395">STANDING</text><text class="attr" x="315" y="1413">raceId, points, position, positionText, wins</text>
+  <circle class="circ" cx="315" cy="1490" r="16"/><text class="ctxt" x="315" y="1495">d</text>
+  <rect class="box lag" x="55" y="1561" width="240" height="58" rx="3"/>
+  <text class="name" x="175" y="1585">DRIVER_STANDING</text><text class="attr" x="175" y="1603">+ driverId · 34,863 rows</text>
+  <rect class="box lag" x="335" y="1561" width="240" height="58" rx="3"/>
+  <text class="name" x="455" y="1585">CONSTRUCTOR_STANDING</text><text class="attr" x="455" y="1603">+ constructorId · 13,391 rows</text>
+  <text class="note" x="50" y="1648">Disjoint and total: each standing row is about exactly one driver or one team.</text>
+  <text class="note" x="50" y="1668">Values are totals AFTER the race, so they must be shifted back one race</text>
+  <text class="note" x="50" y="1686">before they can be used as features.</text>
+
+  <!-- ======================= PANEL C: STATUS specialization ======================= -->
+  <rect x="630" y="1320" width="1240" height="380" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text class="ptitle" x="650" y="1348">Panel C · Specialization of STATUS on a derived attribute "category" (Q3 and cleaning)</text>
+  <path class="tot" d="M1250 1400 L1250 1480"/><path class="totin" d="M1250 1400 L1250 1480"/>
+  <text class="note" x="1262" y="1452" font-weight="700">category</text>
+  <path class="par" d="M1250 1480 L735 1551"/><path class="par" d="M1250 1480 L910 1551"/><path class="par" d="M1250 1480 L1085 1551"/>
+  <path class="par" d="M1250 1480 L1260 1551"/><path class="par" d="M1250 1480 L1435 1551"/><path class="par" d="M1250 1480 L1610 1551"/>
+  <path class="par" d="M1250 1480 L1785 1551"/>
+  <rect class="box qonly" x="1150" y="1371" width="200" height="58" rx="3"/>
+  <text class="name" x="1250" y="1395">STATUS</text><text class="attr" x="1250" y="1413">139 values</text>
+  <circle class="circ" cx="1250" cy="1480" r="16"/><text class="ctxt" x="1250" y="1485">d</text>
+  <g>
+    <rect class="box qonly dash" x="655" y="1551" width="160" height="58" rx="3"/><text class="name" x="735" y="1575">FINISHED</text><text class="attr" x="735" y="1593">Finished</text>
+    <rect class="box qonly dash" x="830" y="1551" width="160" height="58" rx="3"/><text class="name" x="910" y="1575">LAPPED</text><text class="attr" x="910" y="1593">+1 Lap … +49 Laps</text>
+    <rect class="box qonly dash" x="1005" y="1551" width="160" height="58" rx="3"/><text class="name" x="1085" y="1575">MECHANICAL</text><text class="attr" x="1085" y="1593">Engine, Gearbox, …</text>
+    <rect class="box qonly dash" x="1180" y="1551" width="160" height="58" rx="3"/><text class="name" x="1260" y="1575">ACCIDENT / DRIVER</text><text class="attr" x="1260" y="1593">Accident, Collision, …</text>
+    <rect class="box qonly dash" x="1355" y="1551" width="160" height="58" rx="3"/><text class="name" x="1435" y="1575">NON_START</text><text class="attr" x="1435" y="1593">DNQ, DNPQ, Withdrew</text>
+    <rect class="box qonly dash" x="1530" y="1551" width="160" height="58" rx="3"/><text class="name" x="1610" y="1575">REGULATORY</text><text class="attr" x="1610" y="1593">Disqualified, Excluded</text>
+    <rect class="box qonly dash" x="1705" y="1551" width="160" height="58" rx="3"/><text class="name" x="1785" y="1575">AMBIGUOUS</text><text class="attr" x="1785" y="1593">Retired, Damage, …</text>
+  </g>
+  <text class="note" x="650" y="1648">Disjoint and total. "category" is NOT in the CSV: it is a mapping we have to write and document (required for Question 3).</text>
+  <text class="note" x="650" y="1668">The seven groups are candidates only. Where the ambiguous statuses go (Retired, Technical, Damage, Puncture, Collision damage, …)</text>
+  <text class="note" x="650" y="1686">is still undecided.</text>
+</svg>
