@@ -12,7 +12,7 @@ Notebook: `F1_podium_prediction.ipynb`. Deadline: **18 October 2026, 11:59 PM**.
 | 2 | Missing values, table by table | Count blank cells and placeholders per column; for each table say whether the gaps matter and which columns we keep | A1, A4, D1, E3, E4 (partly) | Done |
 | 3 | Formats and data types | Find columns written in more than one format (e.g. race times, pit-stop durations) and text that should be numbers or dates | A2, A3, F6 | Done |
 | 4 | Keys and links | Check primary keys (unique, never empty) and foreign keys (every link points to a real row) | – | Done |
-| 5 | Duplicates | Fully identical rows, repeated IDs, and the same driver twice in one race (shared cars); choose and explain a rule | B1-B4 (B1, B2 decided; B3, B4 open) | In progress (checks and examples done in the notebook; rule applied in step 7) |
+| 5 | Duplicates | Fully identical rows, repeated IDs, and the same driver twice in one race (shared cars); choose and explain a rule | B1-B4 (all decided) | Done (checks, scenarios, B1 rule, B3 and B4 are in the notebook; `results_one_row` is the result) |
 | 6 | Exploring the data (EDA) | Podium rate, grid vs. podium, qualifying coverage per season, `grid = 0`, number of cars per race, with plots | – (gives the evidence for step 7) | To do |
 | 7 | Decisions and cleaning | Drop unused columns, fix duplicates, choose rows and seasons, fix labels; show before/after counts and repeat key plots | C, D2, D3, E1, E2, E4-E6, F1-F5, A5 (and apply A1-A4) | To do |
 | 8 | Feature engineering | Build features using only information known before the race: grid, qualifying, standings before the race, recent form from **past races** (sort by date, group by driver / team, shift by one race); show evidence for each feature | G, L1-L3 | To do |
@@ -25,7 +25,7 @@ Notebook: `F1_podium_prediction.ipynb`. Deadline: **18 October 2026, 11:59 PM**.
 
 Every choice the project needs, from the biggest to the smallest. When a decision is made, the **Decided** column gives the choice and where it is written in the notebook (section → table). Everything else is still **open**.
 
-**Decided so far:** A1, A2, A3, A4, B1, B2, D1, E3, E4 (partly), F6.
+**Decided so far:** A1, A2, A3, A4, B1, B2, B3, B4, D1, E3, E4 (partly), F6.
 
 ### A. Loading and data types
 | # | Decision | Options | Why it matters | Decided |
@@ -41,8 +41,8 @@ Every choice the project needs, from the biggest to the smallest. When a decisio
 |---|---|---|---|---|
 | B1 | Which row to keep when a driver has 2-3 rows in one race | Best finishing position · the car he started in (first `resultId`) · most laps · drop the driver | 85 cases (176 rows). The brief's "non-zero grid" rule fails: in 82 of 85 cases both rows have a grid position | **Keep the row of the car the driver started in: the row with the lowest `resultId` of each pair.** Reasoning below. **Applied** in the notebook (Duplicates → "Applying the rule"): 26,759 → 26,668 rows, 91 removed, new table `results_one_row`. |
 | B2 | Which grid and team to keep for that driver | Take them from the kept row · from the car he started in | If the kept row is the car he took over, its grid is that car's, not his own | **Grid and team come from the same kept row**, so they describe the car he started in. (Same row as B1; nothing is mixed from the other row.) |
-| B3 | What to do when two drivers share one car's result | Both get the podium · only one · drop | 18 races have 4, 5 or 7 podium rows because of shared cars | open |
-| B4 | Accept races where `positionOrder` is not 1, 2, 3, ... | Accept · renumber | 46 early races (all before 1965) | open |
+| B3 | What to do when two drivers share one car's result | Both get the podium · only one · drop | 18 races have 4, 5 or 7 podium rows because of shared cars | **Keep both drivers.** Every driver who shares a finishing place keeps his own row and the same label. After B1 this affects 38 shared places (77 rows), of which only 4 are on the podium (8 rows, in 1951 and 1955). Reasoning below. |
+| B4 | Accept races where `positionOrder` is not 1, 2, 3, ... | Accept · renumber | 46 early races (all before 1965) | **Accept the finishing places as they are, no renumbering.** Renumbering would change 371 rows in 28 races and flip 4 podium labels (the shared podium places), contradicting B3. Only places 1-3 are used by the target, and no race is missing place 1, 2 or 3. (Duplicates → B4 cells) |
 
 #### Why B1 and B2: keep the car the driver started in (quantitative reasoning)
 
@@ -67,7 +67,21 @@ Numbers are from the repeated pairs in `results`: 85 driver-race pairs (79 with 
 
 **Limits of the evidence:** there is no ground truth for "his own car"; the rule rests on points 1-2. The data does not say why a swap happened (59 first rows stopped during the race, 22 have a normal finishing place, 4 did not qualify, withdrew or were disqualified), and the rule does not depend on it. Almost all pairs are before 1965, so if only recent seasons are modeled they disappear anyway.
 
-**Still open here:** B3 (two different drivers credited with the same finishing place in one race: 105 such shared results, all in 1950-1964; 80 are the swap above seen from the car's side, 25 stand alone with nobody having a repeated pair; 18 races have more than 3 podium rows, 7 of them because of a stand-alone shared result) and B4. Note: some car numbers are used by 2+ drivers in a race only because one of them never started (31 of 140 such numbers); these are not shared results.
+**B1 confirmed after the follow-up checks (plain first row).** The refined rule (prefer a row that no other driver shares, otherwise the first row) would change only 3 of 85 pairs (the scenario-B pairs Ascari 1951, González 1954, Moss 1961) and is not used; best grid was also rejected (it picks a different row in 27 pairs and, in 24 of them, keeps a row that matches a row stored before it, with the grid improving by 8.5 places on average). Known limitation: the file has no column that says "this is the same car", so a match on car number, grid and finishing place is only a proxy (the two signals agree on 175 of 176 rows); `resultId` order shows when a row was stored, not whose car it was. Distribution of the 85 pairs: scenario A 78 (92%), B 4 (5%), C 3 (3%). In 56 pairs the first row matches no other driver, in 25 it matches only rows stored after it, in 4 it matches a row stored before it.
+
+#### Why B3: keep both drivers who share a finishing place
+
+Counts are after applying B1 (26,668 rows).
+
+1. **The data cannot tell the sharers apart.** In the 4 shared podium places (1951 French GP, 1951 Indy 500, 1955 Argentine GP, 1955 Indy 500) the two drivers have the same team, car number, grid, finishing place, points and laps. Any rule that picks one of them (`resultId`, `driverId`, alphabetical) is arbitrary.
+2. **The size is tiny.** 38 shared places remain (37 with 2 drivers, 1 with 3), all in 1950-1961; only 4 places (8 rows) are on the podium. Keeping both gives 3,379 podium rows; keeping one per place gives 3,375 (4 labels fewer, 0.015% of 26,668 rows).
+3. **It matches the official classification**, where both drivers are credited with the result (points are split, e.g. 1.33 each).
+4. **Alternatives cost more.** Neither counts: 3,371 podium rows (8 real podium finishes lost). Drop the rows: 8 rows removed (77 if all shared places are dropped).
+5. **It works for any number of sharers.** Up to 5 drivers share one result in the raw data (1954 Indianapolis 500, place 11); after B1 none of the groups of 3 or more is on the podium.
+
+**Cost of keeping both:** 4 races have 4 podium rows instead of 3, so "exactly 3 podium predictions per race" (D3) cannot be forced in those races. All shared podium places are in 1951 and 1955, so none remains if only recent seasons are modeled.
+
+**B4 (decided):** 46 raw races have repeated places and no gaps; after B1, 28 races are not exactly 1 to n (21 only repeated, 4 only missing, 3 both). Accepted as they are. Note: some car numbers are used by 2+ drivers in a race only because one of them never started (31 of 140 such numbers); these are not shared results.
 
 ### C. Which rows to keep
 | # | Decision | Options | Why it matters | Decided |
