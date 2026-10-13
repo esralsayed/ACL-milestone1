@@ -13,7 +13,7 @@ Notebook: `F1_podium_prediction.ipynb`. Deadline: **18 October 2026, 11:59 PM**.
 | 3 | Formats and data types | Find columns written in more than one format (e.g. race times, pit-stop durations) and text that should be numbers or dates | A2, A3, F6 | Done |
 | 4 | Keys and links | Check primary keys (unique, never empty) and foreign keys (every link points to a real row) | – | Done |
 | 5 | Duplicates | Fully identical rows, repeated IDs, and the same driver twice in one race (shared cars); choose and explain a rule | B1-B4 (all decided) | Done (checks, scenarios, B1 rule, B3 and B4 are in the notebook; `results_one_row` is the result) |
-| 6 | Exploring the data (EDA) | Podium rate, grid vs. podium, qualifying coverage per season, `grid = 0`, number of cars per race, with plots | – (gives the evidence for step 7) | To do |
+| 6 | Exploring the data (EDA) | Podium rate, grid vs. podium, qualifying coverage per season, `grid = 0`, number of cars per race, with plots | – (gives the evidence for step 7) | Done (6 analyses and a summary table in the notebook) |
 | 7 | Decisions and cleaning | Drop unused columns, fix duplicates, choose rows and seasons, fix labels; show before/after counts and repeat key plots | C, D2, D3, E1, E2, E4-E6, F1-F5, A5 (and apply A1-A4) | To do |
 | 8 | Feature engineering | Build features using only information known before the race: grid, qualifying, standings before the race, recent form from **past races** (sort by date, group by driver / team, shift by one race); show evidence for each feature | G, L1-L3 | To do |
 | 9 | The three data-engineering questions | Q1 front row → podium by circuit, Q2 home advantage, Q3 mechanical failures by team; each with joins, a plot and an answer | H, I, J | To do (after step 7) |
@@ -25,7 +25,7 @@ Notebook: `F1_podium_prediction.ipynb`. Deadline: **18 October 2026, 11:59 PM**.
 
 Every choice the project needs, from the biggest to the smallest. When a decision is made, the **Decided** column gives the choice and where it is written in the notebook (section → table). Everything else is still **open**.
 
-**Decided so far:** A1, A2, A3, A4, B1, B2, B3, B4, D1, E3, E4 (partly), F6.
+**Decided so far:** A1, A2, A3, A4, B1, B2, B3, B4, C1, C2, C3, C6, C7, D1, E1, E3, E4 (partly), F6.
 
 ### A. Loading and data types
 | # | Decision | Options | Why it matters | Decided |
@@ -86,13 +86,135 @@ Counts are after applying B1 (26,668 rows).
 ### C. Which rows to keep
 | # | Decision | Options | Why it matters | Decided |
 |---|---|---|---|---|
-| C1 | Keep drivers who never started? | Keep · drop | 1,613 rows (did not qualify, did not prequalify, withdrew, 107% rule). None can reach the podium, and it is known before the race | open |
-| C2 | How to define "started the race" | `grid > 0` · `laps > 0` · either · by status | 966 rows have a grid slot but 0 laps (lap-1 crashes); 84 "Withdrew" rows still have a grid slot | open |
-| C3 | Keep the Indianapolis 500? | Keep · drop | 11 races (1950-1960); 104 of its 107 drivers never raced elsewhere in F1 | open |
+| C1 | Keep drivers who never started? | A keep all · **B drop `grid = 0`** · C drop `grid = 0` before 2015 only | 1,635 rows have `grid = 0` (6.1%), none is a podium. The grid slot is known before the race | **B: remove every row with `grid = 0`** (26,668 → 25,033 rows; all 3,379 podium rows stay). The filter uses only `grid`, never `laps` or `status` of the race. Reasoning below. |
+| C2 | How to define "started the race" | `grid > 0` · `laps > 0` · either · by status | 966 rows have a grid slot but 0 laps (lap-1 crashes); 84 "Withdrew" rows still have a grid slot | **A: "started" means a grid slot (`grid > 0`) and nothing else.** Rows with a grid slot and 0 laps (966) stay, and so do rows whose status says Withdrew / Did not qualify / Excluded but have a grid slot (98). `laps` and `status` of the race are post-race and are not used to select rows. Reasoning below. |
+| C3 | Keep the Indianapolis 500? | Keep · drop | 11 races (1950-1960); 381 rows after B1 (405 raw); 103 of its 107 drivers never raced elsewhere in F1 (corrected from 104: only Ascari, Ward, Ruby and Ruttman did) | **Drop the Indianapolis 500** (381 rows, 11 races, 35 podium rows: 3,379 → 3,344). Reasoning below; evidence code in the notebook ("Cleaning: which rows stay" → C3). |
 | C4 | Which seasons to model | All (1950+) · 1994+ · 2003+ · 2006+ | Qualifying data: none before 1994, patchy until 2002, complete from 2003 | open |
 | C5 | Use the same row filters for Q1-Q3 as for the model? | Same · decide per question | Q1 can use all years for grid; Q3 only needs 2014-2024 | open |
-| C6 | Keep disqualified / excluded drivers? | Keep · drop | 155 rows; they raced but lost their result | open |
-| C7 | Use sprint results as a feature? | Use (sprint finish, sprint points) · don't use | Pre-race information, but only 18 races have a sprint. If used, only `raceId`, `driverId`, `positionOrder`, `points` are needed (Missing values → `sprint_results`) | open |
+| C6 | Keep disqualified / excluded drivers? | Keep · drop | 155 rows in the raw table by status (147 Disqualified, 8 Excluded); 146 rows flagged in the table after B1, C1 and C3; they raced but lost their result | **Keep them.** Their label is the official classification (not a podium). Nothing is removed (24,652 rows, 3,344 podium rows). Reasoning below; evidence code in the notebook ("Cleaning: which rows stay" → C6). |
+| C7 | Use sprint results as a feature? | Use (sprint finish, sprint points) · don't use | Pre-race information (1 day before the race in 18 of 18), but only 18 races (341 table rows, 1.4%) have a sprint and none is in the years up to 2019 | **Do not use.** The 341 main-race rows of sprint weekends stay (54 podium rows); only `sprint_results` is left out. Reasoning below; evidence code in the notebook ("Cleaning: which rows stay" → C7). |
+
+
+#### Why C1 = B and E1: remove every row with `grid = 0` (quantitative reasoning)
+
+Counts are from `results_one_row` (26,668 rows, after B1).
+
+**What `grid = 0` contains**
+
+| Group | Rows | Podiums | Notes |
+|---|---|---|---|
+| Never ran (0 laps) | 1,563 | 0 | 1,505 of them (96%) have status Did not qualify (1,012), Did not prequalify (330) or Withdrew (163); seasons 1952-2023 |
+| Ran, from the pit lane | 72 | 0 | All in 2015-2024 (1 in 2015, up to 16 in 2023); finishing places 5 to 22 (median 15); qualifying position known for 71 (5 to 22, median 18) |
+| **Total** | **1,635** | **0** | 6.1% of the rows |
+
+**Reasons for removing them**
+
+1. **The 72 pit-lane rows are too few to teach the model anything and could add noise (team's reason).** They are 0.27% of the rows. The grid is the strongest feature (EDA 2: podium rate falls steeply with the grid, correlation -0.39 to -0.52), and a `0` read as a number sits "ahead of pole position", against that relation.
+2. **A separate flag column is not worth it (team's reason).** A pit-lane flag would be 1 on 72 rows and 0 podiums. The back of the grid in 2015+ (grid 15th or worse) has 12 podiums in 1,225 rows (0.98%), so about 0.7 podiums would be expected in 72 rows. Seeing 0 is what chance gives, so there is no evidence that the flag carries a signal different from "starts at the back".
+3. **The other 1,563 rows are not participants.** None can finish on the podium and the grid slot says so before the race.
+4. **Keeping them flatters the scores.** AUC of the grid alone: 0.890 with them and 0.881 without (train); 0.935 and 0.923 in 1990-94; 0.914 and 0.911 in the test years. The model would be credited for "predicting" drivers who were not in the race, and the podium rate is diluted (12.7% against 13.5%).
+5. **It is a pre-race rule.** The grid is known before the race. `laps` and `status` of the same race are not, so we cannot drop rows with them (see the 966 rows below).
+6. **In 2015+ the two meanings cannot be separated before the race.** Of the 79 modern `grid = 0` rows, 72 ran and 7 did not; both look the same (`grid = 0`), so a rule "keep modern `grid = 0`" would keep 7 non-participants.
+7. **One rule, easy to defend.** Option C needs a year boundary (2015) that we would have to justify, for 72 rows with no podium.
+
+**Options not chosen**
+
+| Option | Rows | Why not |
+|---|---|---|
+| A keep all | 26,668 | Reasons 3 and 4: 6.1% of rows are non-participants and the scores are flattered |
+| C drop `grid = 0` before 2015 only | 25,112 | Reasons 2 and 6: keeps 79 rows (7 non-participants) that carry no usable signal, and needs a year rule |
+
+**Costs and limitations (to state in the report)**
+- The model never sees a pit-lane start (72 rows, 0.27% of the data, 0 podiums).
+- The 966 rows with a grid slot and 0 laps (lap-1 crashes) **stay**: they are only known after the race starts. They carry 0 podiums but are legitimate prediction rows.
+- If someone passes `grid = 0` to the prediction function, it is replaced by the last slot of that race (an assumption, not learned from data).
+- The filter removes no podium row: 3,379 before and after.
+
+#### Why C2 = A: keep every row that has a grid slot, also with 0 laps
+
+Counts are after C1 (25,033 rows with `grid > 0`).
+
+| Group (all have a grid slot) | Rows | Podiums | Top statuses |
+|---|---|---|---|
+| 0 laps | 966 (3.9%) | 0 | Collision 353, Accident 233, Withdrew 61, Engine 47, Spun off 38, Gearbox 34 |
+| Status Withdrew / Did not qualify / Excluded | 98 (73 of them also in the 0-lap group; 25 have laps) | 0 | Withdrew 84, Did not qualify 12, Excluded 2 |
+
+**Reasons**
+1. **It is the pre-race view.** At prediction time a driver with a grid slot is on the grid, and nobody knows who will be out on lap 1. A table that drops the 0-lap rows would be built with the outcome of the race itself.
+2. **Same principle as C1.** C1 removed rows by `grid`, which is known before the race; C2 does not add a filter on `laps` or `status`, which are not.
+3. **The 0-lap rows are not random, and the grid already carries part of it.** The share of rows with 0 laps rises with the grid slot: 2.2% for grid 1-3, 2.5% for 4-6, 3.5% for 7-10, 4.5% for 11-15, 4.8% for 16 and worse; mean grid 13.6 against 11.8 for the others. A model can use this because it only needs the grid.
+4. **The effect on the scores is small, so the choice is made on principle, not on performance.** Score of the grid alone (ROC-AUC / PR-AUC), keeping against dropping the 966 rows: train 0.881 / 0.493 against 0.881 / 0.503; validation 0.907 / 0.639 against 0.911 / 0.667; test 0.911 / 0.647 against 0.910 / 0.651.
+5. **They are correctly labelled.** A driver who did not complete a lap did not finish on the podium, so the label is right; these are negatives, not errors.
+
+**What it costs:** 966 rows (3.9%) that can never be a podium, which lowers the podium rate (13.5% against 14.0% without them) and the PR-AUC slightly (test: 0.647 against 0.651 for the grid alone).
+
+**Note:** the `laps` column of the race being predicted is not a feature (post-race) and is not in the A4 keep list. Values from earlier races are allowed and are handled in step 8 (G7, G8).
+
+#### Why C3: drop the Indianapolis 500
+
+Counts after B1 and C1 (all 381 rows of the race have a grid slot).
+
+| Measure | Indianapolis 500 | Other races, 1950-1960 |
+|---|---|---|
+| Rows | 381 (11 races) | 1,763 |
+| Rows per race | 34.6 | 21.2 |
+| Podium rate (rows with a grid slot) | 9.2% | 14.9% |
+
+1. **95% of its rows have no history.** 103 of its 107 drivers never appear in any other race; they hold 362 of its 381 rows and 32 of its 35 podium rows. Past-race features (form, team form, standings) are empty for them by construction, and they cannot be compared with regular drivers. Only Ascari, Ward, Ruby and Ruttman raced elsewhere.
+2. **Its structure is different:** 34.6 rows per race against 21.2, a lower podium rate, and 21 of the 85 repeated driver-race pairs (25%) are in this race.
+3. **It would distort Question 2 (home advantage)**, as the introduction warns.
+4. **The cost is limited to 1950-1960:** 35 podium rows (3,379 → 3,344, 381 rows). It changes nothing for any training window that starts later.
+5. **The introduction names exclusion as a defensible choice** (allowed source); the data above is our own evidence for it.
+
+**Cost:** 35 podium rows, all in 1950-1960. Q2 loses the American drivers' Indianapolis races.
+
+#### Why C6: keep the disqualified and excluded rows
+
+Counts are for the table after B1, C1 and C3 (24,652 rows).
+
+| Measure | Value |
+|---|---|
+| Rows flagged (status `Disqualified`/`Excluded`, or `positionText` D/E) | **146** (0.59%): 142 by both markers, 4 by the letter only, 0 by status only |
+| Raw table, for reference | status: 147 Disqualified + 8 Excluded = 155; `positionText`: 151 D + 9 E = 160 |
+| Podium rows among the flagged | **0** |
+| Completed at least 90% of the laps of the race | 76 (13 started in the top 3, 10 of them on the front row) |
+| Of those 76, ranked below all unflagged full-distance finishers | 76 of 76 |
+| By decade | 1950s: 5, 1960s: 9, 1970s: 25, 1980s: 51, 1990s: 20, 2000s: 22, 2010s: 9, 2020s: 5 (110 before 2000, 36 from 2000) |
+| Races with a flagged row | 109 of 1,114 (327 of the 3,344 podium rows are in those races) |
+| Podium rate keeping / dropping | 13.56% / 13.65% (3,344 podium rows either way) |
+
+1. **A disqualification is known only after the race.** Dropping the rows would select rows with the result of the race, which is the principle used in C1 and C2.
+2. **It is consistent with D1.** The target is the final classification (`positionOrder`). In the 1983 Brazilian GP, `position` and `positionOrder` differ in 13 rows and one driver gets a podium label he would not have had; those promoted drivers are podiums *because* of the disqualification. Removing the disqualified row but keeping the promoted ones would be inconsistent.
+3. **`positionOrder` already handles them.** All 76 full-distance flagged rows are ranked below every unflagged full-distance finisher, so a disqualified driver is a clean negative.
+4. **Dropping would flatter the scores.** The 13 cars that started in the top 3 and ran the full distance are the hard cases a real prediction faces.
+5. **The size is negligible:** 0.59% of the rows and no podium row.
+6. **No definition is needed.** Status and `positionText` differ on 4 rows; keeping all rows avoids choosing between them.
+
+**Cost / limitation (state in the report):** about 13 drivers who looked like podium finishers on the road (top-3 grid, full distance) carry the label "not a podium". This label noise is not visible in the data.
+
+#### Why C7: do not use the sprint results as features
+
+Counts are for the table after B1, C1 and C3 (24,652 rows).
+
+| Measure | Value |
+|---|---|
+| Sprint races | 18 (2021: 3, 2022: 3, 2023: 6, 2024: 6); `sprint_date` is 1 day before the race date in all 18 |
+| Table rows in sprint weekends | **341** (1.4%), 54 podium rows; up to 2019: **0**, 2020-2021: 56, 2022-2024: 285 |
+| Rows with a sprint result in a training window | up to 2019: 0; up to 2021: 56 (0.24%); up to 2022: 113 (0.48%) |
+| Podium rate: sprint weekends / other races of 2021-2024 | 15.8% / 15.4% |
+| Corr. with podium (grid on the same rows: -0.45) | sprint place -0.47, sprint points 0.53, sprint grid -0.42, team's best sprint place -0.48, team's sprint points 0.51, places gained 0.06, completed 0.01 |
+| Same, after removing what the grid explains | -0.25, 0.38, -0.20, -0.25, 0.34, 0.02, -0.02 |
+| Grid equals sprint place | 2021-2022: 62 of 113 rows (the sprint result set the Sunday grid); 2023-2024: 35 of 228 |
+
+1. **It cannot be learned.** With the training years of the introduction (up to 2019, K1 still open) the column would be constant; training up to 2022 gives only 113 rows (0.48%).
+2. **It would be empty for 98.6% of the rows.** Every fill is an assumption: 0 reads "won the sprint", a large number "finished last", a mean "midfield"; only the row's own grid position is neutral, and then the column adds nothing for 98.6% of rows.
+3. **The evidence is thin:** 341 rows in 18 races, and in 2021-2022 part of the signal is the grid itself.
+4. **It is not rejected for leakage:** the sprint is the day before the race, so it is pre-race information. It is left out because it cannot be trained and tested honestly. State this as a limitation in the report.
+5. **No special case** for 1 row in 70; every model gets the same features.
+
+**Cost:** a possible extra signal in the sprint weekends of 2021-2024 (the sprint place keeps a correlation of -0.25 with the podium after the grid is removed). It can be tested later as an experiment on 2021 and later only.
+
+**Not decided here:** whether sprint failures count in Question 3 (J5).
 
 ### D. Target
 | # | Decision | Options | Why it matters | Decided |
@@ -104,7 +226,7 @@ Counts are after applying B1 (26,668 rows).
 ### E. Grid and qualifying features
 | # | Decision | Options | Why it matters | Decided |
 |---|---|---|---|---|
-| E1 | What `grid = 0` means as a feature | Last place · empty · separate pit-lane flag | Before 1995 it means "never started"; from 2015 it means a pit-lane start (72 rows) | open |
+| E1 | What `grid = 0` means as a feature | Last place · empty · separate pit-lane flag | Before 1995 it means "never started"; from 2015 it means a pit-lane start (72 rows) | **No `grid = 0` rows in the table (follows from C1 = B), no pit-lane flag.** The prediction function treats a given `grid` of 0 as "starts from the pit lane" and uses the last slot of the race; the report states the model never saw this case. Reasoning below. |
 | E2 | What to do when a race has no qualifying data | Fill in · use grid instead · drop those seasons · add a "missing" flag | All races before 1994, most races 1996-2002 | open |
 | E3 | How to use `q2` / `q3` when empty | "Knocked out" flag · use best available time | Empty means "knocked out" from 2005/2006, but "session did not exist" before that | **Not filled in.** The three times become one number: the driver's best qualifying time (from whichever of `q1`-`q3` exists). (Missing values → `qualifying`) |
 | E4 | How to compare lap times between races | Raw seconds · gap to pole (seconds or %) | Every track has a different lap length, so raw times are not comparable | **Partly decided:** compare the best time with the fastest driver in that race (gap to pole). Seconds or % still **open**. (Missing values → `qualifying`) |
