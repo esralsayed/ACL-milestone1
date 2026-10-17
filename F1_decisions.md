@@ -16,7 +16,7 @@ Notebook: `F1_podium_prediction.ipynb`. Deadline: **18 October 2026, 11:59 PM**.
 | 6   | Exploring the data (EDA)                                              | Podium rate, grid vs. podium, qualifying coverage per season, `grid = 0`, number of cars per race, with plots                                                                                                                       | – (gives the evidence for step 7)                     | Done (6 analyses and a summary table in the notebook)                                             |
 | 7   | Decisions and cleaning                                                | Drop unused columns, fix duplicates, choose rows and seasons, fix labels; show before/after counts and repeat key plots                                                                                                             | C, D2, D3, E1, E2, E4-E6, F1-F5, A5 (and apply A1-A4) | To do                                                                                             |
 | 8   | Feature engineering                                                   | Build features using only information known before the race: grid, qualifying, standings before the race, recent form from **past races** (sort by date, group by driver / team, shift by one race); show evidence for each feature | G, L1-L3                                              | To do                                                                                             |
-| 9   | The three data-engineering questions                                  | Q1 front row → podium by circuit, Q2 home advantage, Q3 mechanical failures by team; each with joins, a plot and an answer                                                                                                          | H, I, J                                               | Q1 done (H1-H3 decided, answer and plot in the notebook); Q2 groundwork done (I1-I5); Q3 to do (J1-J5 open) |
+| 9   | The three data-engineering questions                                  | Q1 front row → podium by circuit, Q2 home advantage, Q3 mechanical failures by team; each with joins, a plot and an answer                                                                                                          | H, I, J                                               | Q1 done (H1-H3 decided, answer and plot in the notebook); Q2 done (I1-I5 decided, answer and plot in the notebook); Q3 done (J1-J5 decided, answer and plot in the notebook) |
 | 10  | Split, models, experiments, explanations, prediction function, report | Season split, baseline + second model + small neural network, ablation and preprocessing-order experiments, SHAP / LIME, prediction function, PDF report                                                                            | K, L4-L10, M                                          | To do                                                                                             |
 
 **Rule for past-race features (step 8):** for the race being predicted, only use what is known before it starts: anything from **earlier** races (positions, points, status, standings after the previous race) plus this race's grid and qualifying. Never use this race's own result, points, time or status (that is leakage).
@@ -25,9 +25,9 @@ Notebook: `F1_podium_prediction.ipynb`. Deadline: **18 October 2026, 11:59 PM**.
 
 Every choice the project needs, from the biggest to the smallest. When a decision is made, the **Decided** column gives the choice and where it is written in the notebook (section → table). Everything else is still **open**.
 
-**Deferred to step 10 (decided by experiment, not by argument):** C4, D2 (handling the rare podiums), D3 (top 3 per race or a threshold), the choice between `q1` only and the best of `q1`-`q3` (E3), and the unit and cap of the qualifying gap (E4). See "Experiments to run in step 10" below (the window with and without qualifying is X1 and X2; the fill experiment X5 was dropped for time).
+**Deferred to step 10 (decided by experiment, not by argument):** D2 (handling the rare podiums), the choice between `q1` only and the best of `q1`-`q3` (E3), and the unit and cap of the qualifying gap (E4). See "Experiments to run in step 10" below (the window with and without qualifying is X1 and X2; the fill experiment X5 was dropped for time).
 
-**Decided so far:** A1, A2, A3, A4, A5, B1, B2, B3, B4, C1, C2, C3, C6, C7, D1, E1, E2 (the cleaning rule), E3, E4 (partly), E5, E6, F1, F2 (by F1), F3, F4, F5, F6, G1, G2, G3, G4, G5, G6 (by X7), G7, G8, G9, G10 (field size; year and era by X9), H1, H2, H3, I1, I2, I3 (by A5), I4, I5, J1, J2, J3.
+**Decided so far:** A1, A2, A3, A4, A5, B1, B2, B3, B4, C1, C2, C3, C6, C7, D1, E1, E2 (the cleaning rule), E3, E4 (partly), E5, E6, F1, F2 (by F1), F3, F4, F5, F6, G1, G2, G3, G4, G5, G6 (by X7), G7, G8, G9, G10 (field size; year and era by X9), H1, H2, H3, I1, I2, I3 (by A5), I4, I5, J1, J2, J3, J4, J5, C4 (by X1), D3, K1, K2, K3, K4, K5, K6, L1, L2, L3, L4, L5, L6, L7.
 
 ### A. Loading and data types
 
@@ -94,8 +94,8 @@ Counts are after applying B1 (26,668 rows).
 | C1  | Keep drivers who never started?                      | A keep all · **B drop `grid = 0`** · C drop `grid = 0` before 2015 only | 1,635 rows have `grid = 0` (6.1%), none is a podium. The grid slot is known before the race                                                                         | **B: remove every row with `grid = 0`** (26,668 → 25,033 rows; all 3,379 podium rows stay). The filter uses only `grid`, never `laps` or `status` of the race. Reasoning below.                                                                                                                                  |
 | C2  | How to define "started the race"                     | `grid > 0` · `laps > 0` · either · by status                            | 966 rows have a grid slot but 0 laps (lap-1 crashes); 84 "Withdrew" rows still have a grid slot                                                                     | **A: "started" means a grid slot (`grid > 0`) and nothing else.** Rows with a grid slot and 0 laps (966) stay, and so do rows whose status says Withdrew / Did not qualify / Excluded but have a grid slot (98). `laps` and `status` of the race are post-race and are not used to select rows. Reasoning below. |
 | C3  | Keep the Indianapolis 500?                           | Keep · drop                                                             | 11 races (1950-1960); 381 rows after B1 (405 raw); 103 of its 107 drivers never raced elsewhere in F1 (corrected from 104: only Ascari, Ward, Ruby and Ruttman did) | **Drop the Indianapolis 500** (381 rows, 11 races, 35 podium rows: 3,379 → 3,344). Reasoning below; evidence code in the notebook ("Cleaning: which rows stay" → C3).                                                                                                                                            |
-| C4  | Which seasons to model                               | All (1950+) · 1994+ · 2003+ · 2006+                                     | Qualifying data: none before 1994, patchy until 2002, complete from 2003                                                                                            | **Deferred to step 10 (experiment).** The cleaned table keeps all seasons (1950-2024); the modeling window is chosen by comparing the windows listed in "Experiments to run in step 10". Evidence so far is exploratory only.                                                                                    |
-| C5  | Use the same row filters for Q1-Q3 as for the model? | Same · decide per question                                              | Q1 can use all years for grid; Q3 only needs 2014-2024                                                                                                              | **Each question uses the rows that fit what it describes; only the models use a training window (C4).** Q1: `results_one_row` without the Indianapolis 500 (26,287 rows), front rows by grid and qualifying. Q2: `clean_rows` (24,652 rows, every row has a grid position). Q3: `results_one_row`, 2014-2024 (4,626 rows), race starts by J2. Reasoning below (updated: it first read "Q1-Q3 use the full cleaned table"). |
+| C4  | Which seasons to model                               | All (1950+) · 1994+ · 2003+ · 2006+                                     | Qualifying data: none before 1994, patchy until 2002, complete from 2003                                                                                            | **Decided by experiment X1 (variant d): the models learn from all seasons from 1950, with the qualifying features.** The qualifying position and gap stay empty where there is no qualifying, with `has_qualifying` (E2); gradient boosting uses the empty values as they are, logistic regression and the neural network fill them with the training median plus the flag. On the introduction's split (K1): best variant for gradient boosting (PR-AUC 0.728) and the neural network (0.725); for logistic regression (a) 2003+ is ahead only within chance (-0.011, -0.027 to +0.006); 1950+ against 2003+ with qualifying: +0.059 (boosting) and +0.040 (network), ranges above 0. Same conclusion with rolling validation 2018-21 (check). Reasoning below; code in the notebook ("Test seasons, validation and training window"). |
+| C5  | Use the same row filters for Q1-Q3 as for the model? | Same · decide per question                                              | Q1 can use all years for grid; Q3 only needs 2014-2024                                                                                                              | **All three questions start from the same table, `results_one_row` (one row per driver per race, B1) without the Indianapolis 500 (C3); each then keeps the rows its own definition needs. Only the models use `clean_rows` and a training window (C4).** Q1: no further filter (26,287 rows, table `q1`), front rows by grid and qualifying. Q2: rows with a starting position, `grid > 0` (24,652 rows, table `q2`; the same driver-race pairs as `clean_rows`, checked in the notebook). Q3: 2014-2024 (4,626 rows, table `q3`), race starts by J2. Reasoning below (updated twice: it first read "Q1-Q3 use the full cleaned table", then Q2 used `clean_rows` directly; Q2 now starts from `results_one_row` like Q1 and Q3, with the same rows and answer). |
 | C6  | Keep disqualified / excluded drivers?                | Keep · drop                                                             | 155 rows in the raw table by status (147 Disqualified, 8 Excluded); 146 rows flagged in the table after B1, C1 and C3; they raced but lost their result             | **Keep them.** Their label is the official classification (not a podium). Nothing is removed (24,652 rows, 3,344 podium rows). Reasoning below; evidence code in the notebook ("Cleaning: which rows stay" → C6).                                                                                                |
 | C7  | Use sprint results as a feature?                     | Use (sprint finish, sprint points) · don't use                          | Pre-race information (1 day before the race in 18 of 18), but only 18 races (341 table rows, 1.4%) have a sprint and none is in the years up to 2019                | **Do not use.** The 341 main-race rows of sprint weekends stay (54 podium rows); only `sprint_results` is left out. Reasoning below; evidence code in the notebook ("Cleaning: which rows stay" → C7).                                                                                                           |
 
@@ -242,12 +242,12 @@ Checked columns: `circuits.country`, `drivers.nationality`, `constructors.nation
 
 #### Why C5: which rows each question uses
 
-The model table `clean_rows` was built for **prediction**: C1 removed every `grid = 0` row because, before a race, a `0` cannot be read (it means "did not start" before 2015 and "pit-lane start" from 2015). The three questions **describe what happened**, so they are not bound by that pre-race rule; each uses the rows that fit its own definition.
+The model table `clean_rows` was built for **prediction**: C1 removed every `grid = 0` row because, before a race, a `0` cannot be read (it means "did not start" before 2015 and "pit-lane start" from 2015). The three questions **describe what happened**, so they are not bound by that pre-race rule. For consistency, **all three start from `results_one_row` without the Indianapolis 500** (26,287 rows) and each applies only the filter its own definition needs.
 
 | Question | Rows used | Why |
 |---|---|---|
 | **Q1** (front row to podium) | `results_one_row` without the Indianapolis 500 (C3): 26,287 rows, table `q1` | The question asks to distinguish qualifying from grid. A driver who qualified on the front row but started from the pit lane has `grid = 0` and is not in `clean_rows`: these are 2 of the 38 rows that qualified on the front row but did not start there (H1), exactly the penalty cases the question asks about. The grid front row (grid 1-2) is the same in both tables. |
-| **Q2** (home advantage) | `clean_rows`: 24,652 rows | The question controls for the **starting position**, so every row needs one: a `grid = 0` row has none (1,635 rows, 0 podiums, C1). The comparison inside grid bands (I4) only works on rows with a grid position. It is also the same population as the model. |
+| **Q2** (home advantage) | `results_one_row` without the Indianapolis 500, rows with `grid > 0`: 24,652 rows, table `q2` | The question controls for the **starting position**, so every row needs one: a `grid = 0` row has none (1,635 rows, 0 podiums; "did not start" before 2015, a pit-lane start from 2015, C1). The comparison inside grid bands (I4) only works on rows with a grid position. Keeping the 72 pit-lane starts as an extra band would not change the answer: they have 0 podiums, and a band with no podium adds nothing to the Mantel-Haenszel odds ratio. **The result is the same driver-race pairs as `clean_rows`** (checked in the notebook: 24,652 in both, 0 in only one), so the counts and the odds ratio (0.93, 0.78-1.07) are unchanged. |
 | **Q3** (mechanical retirements) | `results_one_row`, 2014-2024: 4,626 rows, table `q3`; race starts = `positionText` is not `W` (J2): 4,598 | The rate is per **race start**. The 72 pit-lane starts of 2015-2024 raced (none is `W`) and 8 of them ended with a mechanical failure, but C1 removed them from `clean_rows`; using `clean_rows` would drop real starts and failures (unevenly: Red Bull, Williams and Haas have 11 pit-lane starts each). The 28 withdrawn rows (`W`) are removed instead, by the question's own definition. `laps` and `positionText` of the race are post-race, which is allowed here because Q3 is a description, not a feature. |
 | **Models** | `clean_rows`, with the training window chosen by experiment (C4, X1) | Prediction rows must be selected with pre-race information only (C1, C2). |
 
@@ -259,7 +259,7 @@ The Indianapolis 500 is out of every table (C3); it only matters for 1950-1960, 
 | --- | ------------------------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | D1  | Confirm the target                               | `positionOrder <= 3`                        | `positionOrder` already includes post-race disqualifications (e.g. 1983 Brazilian GP) | **`positionOrder` 1, 2 or 3 = podium.** It is never missing, unlike `position`. (Missing values → `results`) |
 | D2  | How to handle podiums being rare                 | Class weights · resampling · nothing        | About 13% podiums overall (9.5% in 1989-94, 15% in 2022-24)                           | **Deferred to the modelling phase (step 10).** Facts (all years, cleaned table): 3,344 podium rows of 24,652 (13.6%), 6.37 non-podiums per podium; always answering "no podium" is right for 86.4%. Candidates: nothing + threshold chosen on validation (K3); class weights ("balanced": podium 3.69, not podium 0.578); oversampling; undersampling. Any resampling is done after the split, on training rows only. |
-| D3  | Force exactly 3 podiums per race in predictions? | Yes (top 3 per race) · no (fixed threshold) | A plain threshold can predict 0 or 6 podiums in one race                              | **Deferred to the modelling phase (step 10).** Fact (all years, cleaned table): 1,112 races have exactly 3 podium rows and 2 have 4 (shared cars of 1951 and 1955, B3), so "top 3 per race" fits almost every race. Candidates: a fixed threshold chosen on validation (K3) against the 3 highest predictions of each race. |
+| D3  | Force exactly 3 podiums per race in predictions? | Yes (top 3 per race) · no (fixed threshold) | A plain threshold can predict 0 or 6 podiums in one race                              | **Decided (step 10): predictions are not forced to exactly 3 per race.** "Top 3 per race" is reported as an extra F1 column for every model, as a check. On validation it gives the same F1 as the threshold within chance (0.675-0.692 against 0.674-0.704); a hybrid (threshold capped at 3 per race) was lower. D3 changes nothing in the modelling table or training. Reasoning below (Why K3 and D3). |
 
 ### E. Grid and qualifying features
 
@@ -267,8 +267,8 @@ The Indianapolis 500 is out of every table (C3); it only matters for 1950-1960, 
 | --- | ----------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | E1  | What `grid = 0` means as a feature                          | Last place · empty · separate pit-lane flag                            | Before 1995 it means "never started"; from 2015 it means a pit-lane start (72 rows) | **No `grid = 0` rows in the table (follows from C1 = B), no pit-lane flag.** The prediction function treats a given `grid` of 0 as "starts from the pit lane" and uses the last slot of the race; the report states the model never saw this case. Reasoning below.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | E2  | What to do when a race has no qualifying data               | Fill in · use grid instead · drop those seasons · add a "missing" flag | All races before 1994, most races 1996-2002                                         | **No fill and no row dropped in the cleaned table.** The qualifying columns stay empty where qualifying is missing, and **one boolean column `has_qualifying`** says whether the driver has a qualifying row (a qualifying position). Experiments use it in step 10 (X1, X2); the fill experiment X5 was dropped for time (only 21 rows from 2003 on lack qualifying). Reasoning below.                                                                                                                                                                                                                                                                                                                                                        |
-| E3  | How to use `q2` / `q3` when empty                           | "Knocked out" flag · use best available time                           | Empty means "knocked out" from 2005/2006, but "session did not exist" before that   | **Not filled in.** The three times become one number: the driver's best qualifying time (from whichever of `q1`-`q3` exists). (Missing values → `qualifying`) **Note (step 10):** whether the one number should be the best of `q1`-`q3` or the `q1` time only is an experiment (see below); in the cleaned table all three times are kept in seconds.                                                                                                                                                                                                                                                                                                                                    |
-| E4  | How to compare lap times between races                      | Raw seconds · gap to pole (seconds or %)                               | Every track has a different lap length, so raw times are not comparable             | **Partly decided:** compare the best time with the fastest driver in that race (gap to pole). Seconds or % still **open**. (Missing values → `qualifying`) **Data check:** across the 27 circuits with at least 5 races (2003+), the pole time correlates +0.59 with the typical gap in seconds and -0.06 with the typical gap in percent (shortest lap, 66 s: 1.07 s = 1.66%; longest, 108 s: 1.87 s = 1.75%), so percent is comparable across circuits and seconds are not. 23 rows (0.26%) have a gap above 20%, none a podium; the 99th percentile is 13.17%. The unit and a cap at the 99th percentile of the training years are compared in step 10; both gaps are built in step 8. |
+| E3  | How to use `q2` / `q3` when empty                           | "Knocked out" flag · use best available time                           | Empty means "knocked out" from 2005/2006, but "session did not exist" before that   | **Not filled in.** The three times become one number: the driver's best qualifying time (from whichever of `q1`-`q3` exists). (Missing values → `qualifying`) **Note (step 10):** whether the one number should be the best of `q1`-`q3` or the `q1` time only is an experiment (see below); in the cleaned table all three times are kept in seconds. **Step 10: no longer used as a feature** (the gap, its only use, was removed; see E4). X3 is dropped. |
+| E4  | How to compare lap times between races                      | Raw seconds · gap to pole (seconds or %)                               | Every track has a different lap length, so raw times are not comparable             | **Partly decided:** compare the best time with the fastest driver in that race (gap to pole). Seconds or % still **open**. (Missing values → `qualifying`) **Data check:** across the 27 circuits with at least 5 races (2003+), the pole time correlates +0.59 with the typical gap in seconds and -0.06 with the typical gap in percent (shortest lap, 66 s: 1.07 s = 1.66%; longest, 108 s: 1.87 s = 1.75%), so percent is comparable across circuits and seconds are not. 23 rows (0.26%) have a gap above 20%, none a podium; the 99th percentile is 13.17%. The unit and a cap at the 99th percentile of the training years are compared in step 10; both gaps are built in step 8. **Revisited in step 10: the qualifying gap is removed.** It mostly repeats the qualifying position (rank correlation 0.88); adding it to grid + position changes validation PR-AUC by +0.009 (-0.003 to +0.020). It carries a little information within the same position (about 7 points of podium rate at P2, P4-P6). Code in the notebook ("Is the qualifying gap needed"). The unit/cap question (X4) is dropped. |
 | E5  | Use qualifying position, grid, or both?                     | One · both · their difference                                          | They match in only 77% of rows (penalties)                                          | **Use both, as two separate feature groups: the grid position and the qualifying position.** Reasoning below.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | E6  | Which team ID to trust when qualifying and results disagree | Results · qualifying                                                   | 10 rows in 2015: "Marussia" in qualifying vs. "Manor Marussia" in results           | **The team comes from `results.constructorId`** (same row as the grid, B2); `qualifying.constructorId` is not used. Reasoning below; code in the notebook ("E6: which team do we trust...").                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -481,8 +481,7 @@ Descriptive evidence only (no scores): raw points mean different things in diffe
 | G7  | Which past results to measure                              | Podium rate · average finish · points · DNF rate                | Each tells a different story                                                | **E: three measures of the earlier races: podium share, relative place (rank of `positionOrder` among the race's starters / number of starters), finish rate (`Finished` or `+n Laps`).** Same measures for driver and team form, with the G1 windows and the races available. Points rejected (raw and normalized). Reasoning below; code in the notebook ("What the form measures (decision G7)"). |
 | G8  | Do past non-starts count in form?                          | Count · skip                                                    | A "did not qualify" is not a race result                                    | **A: the form is computed from `clean_rows` only** (the same table as the rows we predict). Non-starts (`grid = 0`, 1,563 rows) and the 72 pit-lane starts removed by C1 are not in the history; a row with a grid slot counts as a start (C2), also with 0 laps. "Last N" means the last N starts. Reasoning below. |
 | G9  | Add circuit history (driver at this track)?                | Yes · no                                                        | Few races per driver per circuit, so it is noisy                            | **A: no circuit-history feature** (neither for the driver nor for the team). Most rows have too few earlier starts at the circuit to support a relation (61.7% fewer than 3). Reasoning below; code in the notebook ("A driver's history at this circuit (decision G9)"). |
-| G10 | Add the year or era as a feature?                          | Yes · no                                                        | Podium patterns change by era                                               | **Field size (number of starters in the race) is built as a feature; the year and the era are decided by experiment X9:** (a) field size only, (b) + era as categories (the introduction's 9 eras), (c) + year as a number. Reasoning below. |
-
+| G10 | Add the year or era as a feature?                          | Yes · no                                                        | Podium patterns change by era                                               | **Field size (number of starters in the race) is built as a feature; the year and the era are decided by experiment X9:** (a) field size only, (b) + era as categories (the introduction's 9 eras), (c) + year as a number. Reasoning below. **Updated (step 10): `base_podium_chance` = 3 ÷ starters replaces field size** (same information; the podium rate equals 3 ÷ starters within 0.17 points in every era; logistic regression cannot bend field size into that curve; gradient boosting unaffected). Code in the notebook ("G10 updated"). |
 #### Why G1: five windows are built, and chosen by experiment
 
 Counts are for the table after the row filters (24,652 rows; 8,884 from 2003 on). "Earlier starts" are starts (grid slot, C2) of the same driver before this race.
@@ -750,6 +749,8 @@ Starters per race: 10-34 in the training years, 16-20 in the test years (inside 
 
 **Risks, stated:** the era stands for many things at once (rules, reliability, field size), so its importance is hard to interpret and is not a cause (brief, section 6: importance "is not proof that it causes podium finishes"); the era boundaries come from the introduction, not the data; under the introduction's split the test era has no training rows and the test years are outside the training years (trees cannot extrapolate). The brief asks for "era sensitivity" as a known limitation in the report (Deliverables, item 8).
 
+**Update (step 10): the feature is `base_podium_chance` = 3 ÷ starters, not field size.** Both carry the same information; the base chance is the measured pattern itself (podium rate = 3 ÷ starters within 0.17 points in every era, exactly in 8 of 9), so logistic regression, which gives each feature a straight-line effect, gets the right shape directly; gradient boosting is unaffected (same order of values). It reads as a probability (part M).
+
 **Depends on the split (K1):** if the test seasons' era appears in training, the experiment can be read on test as well. The split must stay by seasons (a random split by rows would put races of one season in both training and test).
 
 ### H. Question 1 (front row → podium, by circuit)
@@ -836,7 +837,7 @@ Example: Red Bull Ring, 1 race in 2003-13 (2 front-row starts, 2 podiums, 100%) 
 
 There is **no column** that says home race (checked in all 14 tables: the only place columns are `circuits.location` and `circuits.country`, the only nationality columns are in `drivers` and `constructors`). A race is a home race when the circuit's country is the country of the driver's nationality.
 
-Counts are for the table after B1, C1, C3, C6 and C7 (24,652 rows), with the labels cleaned in A5 (42 driver nationalities, 34 circuit countries).
+Counts are for the Question 2 table `q2` (`results_one_row` without the Indianapolis 500, rows with `grid > 0`, C5: 24,652 rows, the same pairs as `clean_rows`), with the labels cleaned in A5 (42 driver nationalities, 34 circuit countries).
 
 | Link                                                      | Count | Which                                                                                                                                                                    |
 | --------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -881,7 +882,7 @@ Counts are for the table after B1, C1, C3, C6 and C7 (24,652 rows), with the lab
 
 #### Why I4: compare inside grid bands
 
-Counts are for the table after the row filters (24,652 rows, 1,939 home races).
+Counts are for the Question 2 table `q2` (24,652 rows, 1,939 home races; C5).
 
 | Measure                | Home  | Away   |
 | ---------------------- | ----- | ------ |
@@ -913,6 +914,8 @@ The starting place matters a great deal by itself: podium rate 55.4% from places
 
 **Limits (state in the report):** the band edges are our choice (tested); the interval is wide, so a small effect either way cannot be excluded; only the starting place is controlled, not the car or the driver; it describes an association, not a cause.
 
+**Question 2 answered** (notebook, "Answering Question 2"): no home advantage. Without the control home 11.6% (1,939 rows) against away 13.7% (22,713), but home drivers start further back (12.7 against 11.7); inside every grid band the home and away ranges overlap (e.g. grid 1-3: 55.8% against 55.4%); pooled odds ratio 0.93 (0.78-1.07), weighted difference -0.5 points.
+
 ### J. Question 3 (mechanical failures by team)
 
 | #   | Decision                                | Options                                     | Why it matters                                                                                                                               | Decided |
@@ -920,8 +923,8 @@ The starting place matters a great deal by itself: podium rate 55.4% from places
 | J1  | Which statuses count as "mechanical"    | Write a mapping for all statuses that occur | 62 different statuses appear in 2014-2024; some are unclear: `Retired`, `Technical`, `Damage`, `Collision damage`, `Puncture`, `Out of fuel` | **Explicit mapping of the 57 non-finish statuses of 2014-2024: 47 mechanical (416 rows), 10 not mechanical (385 rows).** Not mechanical: Collision, Accident, Collision damage, Spun off, Illness, Disqualified, Excluded, Withdrew, Out of fuel, Retired. Mechanical: the 35 named parts/systems plus Wheel, Puncture, Tyre, Undertray, Front wing, Rear wing, Wheel nut, Damage, Technical, Vibrations, Debris, Seat. No sensitivity check. Reasoning below; code in the notebook ("J1: which statuses count as 'mechanical'?"). |
 | J2  | What to divide by                       | Race starts only · all entries              | Drivers who never started cannot fail                                                                                                        | **D: a race start is every row whose `positionText` is not `W` (withdrawn)**, from `results_one_row` (not the model table): 4,598 starts, 401 mechanical retirements (321 / 3,246 in 2014-21, 80 / 1,352 in 2022-24). Reasoning below; code in the notebook ("J2: what counts as a 'race start'?"). |
 | J3  | Per `constructorId` or per team lineage | —                                           | Teams were renamed between the two eras                                                                                                      | **One team = one `constructorId`** (as G3). No ID changes at the 2021/2022 boundary, so the 11 teams in both periods are compared ID to ID; renamed teams inside a period appear as separate IDs. Reasoning below; code in the notebook ("J3: one team = one constructorId, or follow the renames?"). |
-| J4  | Minimum starts for a team to be shown   | e.g. 20 starts                              | Teams with very few starts give extreme rates                                                                                                | open    |
-| J5  | Count sprint failures?                  | Yes · no                                    | Sprints exist only from 2021                                                                                                                 | open    |
+| J4  | Minimum starts for a team to be shown   | e.g. 20 starts                              | Teams with very few starts give extreme rates                                                                                                | **At least 34 race starts in the period** (one full season with two cars in the shortest season, 2020: 17 races × 2). Ranked: 17 of 19 teams in 2014-21 (Marussia 31 and Caterham 33 starts, both part of 2014 only, are not), all 12 in 2022-24. Trial and error: the top 3 of both periods is the same for any minimum from 34 to 75; 34 ranks the most teams. The number is a convention. Reasoning below; code in the notebook ("J4: how many race starts..."). |
+| J5  | Count sprint failures?                  | Yes · no                                    | Sprints exist only from 2021                                                                                                                 | **No: the rates use Grand Prix starts only.** Sprints (J1 mapping, J2 start rule): 60 starts and 1 mechanical retirement in 2014-21 (3 sprints, all 2021), 299 and 3 in 2022-24 (15 sprints); they would be 1.9% of the ranked teams' starts in 2014-21 and 18.1% in 2022-24. Adding them changes no top 3 but lowers every 2022-24 rate (up to 2.1 points). Reasoning below; code in the notebook ("J5: do sprint failures count?"). |
 
 #### Why J1: an explicit mapping of the statuses
 
@@ -976,31 +979,326 @@ Starts (J2) per ID: 19 IDs in 2014-21, 12 in 2022-24, 11 in both. The 10 IDs rac
 
 **Limit:** a team renamed inside a period appears as two smaller teams.
 
+#### Why J4: a team is ranked with at least 34 race starts
+
+Race starts of J2, one team = one `constructorId` (J3); rate = mechanical retirements (J1) ÷ starts, with the 95% Wilson range.
+
+| Fact | Value |
+|---|---|
+| Teams | 19 in 2014-21 (31 to 320 starts), 12 in 2022-24 (48 to 136) |
+| Few starts, wide range | Caterham 2014-21: 7 of 33 = 21.2% (range 10.7-37.8%, 27.1 points); Mercedes 2014-21: 15 of 320 = 4.7% (2.9-7.6%, 4.7 points) |
+| Races per season | 17 (2020) to 24 (2024); cars of one team in one race: 2 in 2,284 team-races, 1 in 30 |
+| One full season, two cars | 2 × 17 = **34 starts** |
+| Below 34 | Marussia 31 (16 of the 19 races of 2014), Caterham 33 (17 of 19); both 2014-21, both part of 2014 only |
+
+**Trial and error** (top 3 by rate; starts in brackets):
+
+| Minimum | Teams ranked 2014-21 / 2022-24 | 2014-21 top 3 | 2022-24 top 3 |
+|---|---|---|---|
+| 0 to 33 | 19 or 18 / 12 | Caterham 21.2% (33), Lotus F1 20.0% (75), Toro Rosso 16.5% (242) | Alfa Romeo 12.5% (88), Alpine F1 Team 10.4% (135), AlphaTauri 8.0% (88) |
+| **34** to 44 | **17** / **12** | **Lotus F1 20.0%, Toro Rosso 16.5%, Renault 14.6% (199)** | **same** |
+| 45 to 75 | 15 / 12 (10 from 49) | same | same |
+| 76 to 88 | 13 to 11 / 10 | Toro Rosso, Renault, McLaren 13.6% (316) | same |
+| 89 to 100 | 11 / 8 | same | Alpine F1 Team, Williams 6.0% (134), Aston Martin 5.2% (134) |
+| 150 | 10 / 0 | same | no team |
+
+**Reasons:** it removes only the two partial seasons, the rates with the widest ranges (21.6 and 27.1 points); the top 3 of both periods does not depend on the exact number from 34 to 75; of those minimums 34 ranks the most teams (a higher one only removes full-season teams split by renames, 44-48 starts: Aston Martin and Alpine F1 Team 2021, Sauber and RB F1 Team 2024); one rule for both periods, tied to a season and not to the length of the period (8 seasons against 3). **The number is a convention** ("one full season with two cars"), not decided by the data; the trial shows the answer does not move inside 34-75.
+
+**Rejected:** A, no minimum (2014-21 led by a partial season of 33 starts, range 27 points wide); C, at least 49 (same top 3, drops 4 full-season teams); D, at least 76 or 100 (drops Lotus F1, then Alfa Romeo, the 2022-24 leader; at 150 no 2022-24 team).
+
+**Limit:** Marussia and Caterham are listed in the Q3 answer with their rates and ranges as "not ranked: partial season". Teams with 34-48 starts still have wide ranges (Alpine F1 Team 2021: 3.6-21.2%), and the leaders' ranges overlap (Lotus F1 12.5-30.4%, Toro Rosso 12.4-21.7%), so the answer gives the order with its ranges, not a strict ranking.
+
+#### Why J5: sprint failures do not count
+
+The introduction: "Sprint weekends (2021 onward, a handful of races per season) add a short Saturday race of about 100 km with fewer points." `sprint_results`: 360 rows, 18 sprints (3 in 2021, 3 in 2022, 6 in 2023, 6 in 2024); every non-finish status is already in the J1 mapping.
+
+| | 2014-21 | 2022-24 |
+|---|---|---|
+| Sprints | 3 (all 2021) | 15 |
+| Sprint starts (J2: not `W`) | 60 | 299 |
+| Mechanical retirements (J1) | 1 (Red Bull 2021, Vibrations) | 3 (Alpine F1 Team 2022 Electrical, Aston Martin 2023 Brakes, Haas F1 Team 2024 Exhaust) |
+| Share of the ranked teams' starts if added | 1.9% | 18.1% |
+| Effect on the rates if added | at most 1.1 points | every rate falls, up to 2.1 points (Alfa Romeo 12.5% to 10.4%) |
+| Top 3 | unchanged | unchanged |
+
+Oddities: the Alpine row has the letter `N` (not in the introduction's list of letters); the Haas row is classified 20th with a car-part status.
+
+**Reasons:** both periods are compared on the same kind of start (with sprints, 18.1% of the 2022-24 starts would be short races against 1.9% in 2014-21, and a short race gives a car less distance in which to fail); consistent with C7 (sprint results are not used anywhere); no top 3 changes; the 4 sprint retirements are stated in the answer.
+
+**Rejected:** B, add sprint starts and failures (lowers 2022-24 by construction); C, sprint failures without sprint starts (inflates the rates).
+
+**Limit:** 4 mechanical retirements in sprints are not in the rates.
+
+**Question 3 answered** (notebook, "Answering Question 3"): 2014-21 top 3 Lotus F1 20.0%, Toro Rosso 16.5%, Renault 14.6%; 2022-24 top 3 Alfa Romeo 12.5%, Alpine F1 Team 10.4%, AlphaTauri 8.0%; all teams 9.89% (8.91-10.96%) against 5.92% (4.78-7.30%); of the 11 teams ranked in both periods 8 are lower in 2022-24 (McLaren 13.6% to 3.7%, the only separated ranges; Alfa Romeo 4.2% to 12.5%); rank correlation -0.54 (p = 0.08).
+
 ### K. Split and evaluation
 
 | #   | Decision                                      | Options                                           | Why it matters                                            | Decided |
 | --- | --------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------- | ------- |
-| K1  | Confirm the season split                      | Train ≤ 2019 · validation 2020-2021 · test ≥ 2022 | Given in the intro PDF                                    | open    |
-| K2  | Main and second metric                        | e.g. PR-AUC main, ROC-AUC second                  | The brief asks us to justify the choice; podiums are rare | open    |
-| K3  | How to choose the decision threshold for F1   | Best F1 on validation · top 3 per race            | Must use validation, never test                           | open    |
-| K4  | The brief's "all five metrics"                | Add precision, recall, accuracy · ask             | Only three metrics are listed in the brief                | open    |
-| K5  | Retrain on train + validation before testing? | Yes · no                                          | More data vs. a cleaner comparison                        | open    |
-| K6  | Treat 2020 as a normal season?                | Yes · note it                                     | COVID season: only 17 races                               | open    |
+| K1  | Confirm the season split                      | Train ≤ 2019 · validation 2020-2021 · test ≥ 2022 | Given in the intro PDF                                    | **The introduction's split: training up to 2019, validation 2020-2021, test 2022-2024.** Validation has 39 races (95% range about 0.24 PR-AUC wide), so differences of about 0.02-0.03 are not separable; every validation score is given with its range. Rolling validation over 2018-21 was tried as a check (narrower ranges, same X1 conclusion) and not adopted, because it is harder to explain. Reasoning below. |
+| K2  | Main and second metric                        | e.g. PR-AUC main, ROC-AUC second                  | The brief asks us to justify the choice; podiums are rare | **PR-AUC primary, ROC-AUC secondary.** Podiums are 13.4% of the training rows and 15.3% of validation; the brief: PR-AUC is "more informative than ROC-AUC when the positive class (podiums) is rare". Over the 12 X1 runs: PR-AUC 0.657-0.728, ROC-AUC 0.914-0.930, and the two pick different winners. All metrics reported for every model. Reasoning below; code in the notebook ("K2: which metric..."). |
+| K3  | How to choose the decision threshold for F1   | Best F1 on validation · top 3 per race            | Must use validation, never test                           | **For each model, the threshold with the best F1 on validation 2020-21, used unchanged on the test.** F1, precision and recall use it. It follows the brief ("at a chosen probability threshold", chosen on validation), is at least as good as the alternatives (equal within chance), and works for a single record (prediction function). Best thresholds 0.22-0.38, not 0.5. Reasoning below; code in the notebook ("K3 and D3"). |
+| K4  | The brief's "all five metrics"                | Add precision, recall, accuracy · ask             | Only three metrics are listed in the brief                | **The three metrics of Section 4 (ROC-AUC, PR-AUC, F1) plus precision and recall**, the two parts of F1 at the same threshold, for every model on validation and test. Covers the deliverables' "all five metrics" whether or not "five" is a typo. Accuracy not used: never predicting a podium scores 84.7% on validation. |
+| K5  | Retrain on train + validation before testing? | Yes · no                                          | More data vs. a cleaner comparison                        | **No retraining.** The test uses the model trained up to 2019, with the settings and threshold chosen on validation 2020-21: the model we validate is the model we test (the brief's plain procedure). Proxy (train to 2017 vs to 2019, both predicting 2020-21): gain -0.002 to +0.017 PR-AUC, all within chance. Reasoning below. |
+| K6  | Treat 2020 as a normal season?                | Yes · note it                                     | COVID season: only 17 races                               | **Normal season.** The introduction notes a "COVID-shortened 17-race season in 2020" (14 circuits, first race 2020-07-05), but its rows look like the other seasons: podium rate 15.2% (others 2014-24: 13.8-15.6%), 19.7 rows per race (19.2-21.8), 3 rows with no earlier start. Removing it would cut validation from 39 races to 22. One line in the report. Code in the notebook ("K4, K5, K6"). |
+
+#### Why K1 and C4: the introduction's split, training from 1950 with the qualifying features
+
+Notebook section "Test seasons, validation and training window (K1, C4, experiment X1)". Features: the pre-race features built so far (grid, field size, driver and team rank after the previous race, driver and team form over the last 5 races, qualifying position and gap); models untuned; **the test seasons are never used.**
+
+**Split (K1).** The introduction: "train ≤ 2019, validation 2020–2021, test ≥ 2022". 2022-2024 is the introduction's "ground-effect era" (68 races, qualifying for 100% of rows); no training or validation row is from it. The split is in time order, so nothing from the future is used; it is given, so it is the same for every team and simple to explain.
+
+**How precise is a validation of 2 seasons?** (one block ending in 2021, logistic regression with qualifying)
+
+| Validation | Races | PR-AUC | 95% range width | Narrowing from adding this season |
+|---|---|---|---|---|
+| 2014-2021 | 160 | 0.724 | 0.101 | 0.007 |
+| 2016-2021 | 122 | 0.722 | 0.115 | 0.007 |
+| 2017-2021 | 101 | 0.714 | 0.122 | 0.023 |
+| 2018-2021 | 81 | 0.713 | 0.145 | 0.048 |
+| 2019-2021 | 60 | 0.729 | 0.193 | 0.044 |
+| **2020-2021 (introduction)** | **39** | 0.709 | **0.237** | 0.039 |
+
+The PR-AUC has no trend (0.709-0.734); only the width changes (it shrinks with the square root of the number of races). **Limit of the chosen split:** with 39 races, differences of about 0.02-0.03 cannot be separated from chance, so every validation score is reported with its range.
+
+**X1 on the introduction's split (validation 2020-21: 763 rows, 39 races, 117 podiums; random guess 0.153), PR-AUC:**
+
+| Variant | Logistic regression | Gradient boosting | Neural network (1 layer, 32) |
+|---|---|---|---|
+| (a) 2003+, with qualifying | **0.720** | 0.669 | 0.685 |
+| (b) 2003+, without | 0.706 | 0.657 | 0.713 |
+| (c) 1950+, without | 0.700 | 0.702 | 0.692 |
+| **(d) 1950+, with qualifying (empty + flag)** | 0.709 | **0.728** | **0.725** |
+
+Differences (95% range from resampled races): (d) - (a): logistic -0.011 (-0.027 to +0.006), boosting **+0.059 (+0.013 to +0.095)**, network **+0.040 (+0.003 to +0.084)**; (d) - (c), what qualifying adds from 1950: +0.009 (-0.000 to +0.019), +0.026 (+0.000 to +0.047), +0.033 (-0.005 to +0.059). Gradient boosting on 2003+ fits its training years almost perfectly (PR-AUC 0.947 on training, 0.669 on validation). Qualifying coverage: 34.5% of the rows up to 2017, 99.9% of 2018-21, 100% of 2022-24.
+
+**Check with rolling validation over 2018-2021** (fold k: train on the seasons before k, validate on k; 4 folds pooled, 81 races): the same conclusion. (d) best for boosting (0.733) and the network (0.717); logistic (a) ahead only within chance (-0.006, -0.019 to +0.006); 1950+ against 2003+: +0.040 and +0.054, ranges above 0. Not adopted as the split: harder to explain, and the introduction's split is given. The split was not chosen by its score; neither run used the test seasons.
+
+**Reasons (C4):** (d) is best for two of three models and within chance of the best for the third; 2003+ is clearly worse for the flexible models; the brief names qualifying features ("leakage-safe form/standings/grid/qualifying features"); validation and test rows almost always have them. Empty values: no fill for gradient boosting; training median + flag for logistic regression and the network (L1).
+
+**Exploratory checks before this decision (scratch runs, not in the notebook):** three fills for logistic regression (median, copy of the grid, worst value) gave 0.705-0.712, median best; a network's score moved by up to 0.065 between random seeds on 2020-21; chronological 60/20/20 by seasons put 2021 into the test (mixing two eras), 80/10/10 left 46 test races.
+
+**Rejected:** a larger validation (one block 2018-21, or rolling validation: narrower ranges, same conclusion, not the introduction's split, harder to explain); percentage splits (move the test away from the era change; a random split by rows leaks races and later seasons); 2003+ (a, b); no qualifying (c).
+
+**Limits:** 39 validation races; untuned models and provisional features (X1 is checked again when step 8 is complete); the qualifying effect is learned from 1994+ rows only.
+
+#### Why K2: PR-AUC primary, ROC-AUC secondary
+
+The brief: "Compute all of the above metrics for every model" and, in the deliverables, "your primary/secondary metric choice justified". All metrics are reported; the primary one decides (tuning, best model, experiments), the secondary one is the check.
+
+| Fact (introduction's split) | Value |
+|---|---|
+| Podium rate | 13.4% of training rows (1950-2019), 15.3% of validation |
+| Random guess | ROC-AUC 0.500, PR-AUC 0.153 |
+| 12 X1 runs, ROC-AUC | 0.914 to 0.930 (spread 0.016) |
+| 12 X1 runs, PR-AUC | 0.657 to 0.728 (spread 0.071) |
+| Best run by PR-AUC / by ROC-AUC | gradient boosting (d) 0.728 / logistic regression (a) 0.930 |
+
+**Reasons:** podiums are rare and the brief says PR-AUC is "more informative than ROC-AUC when the positive class (podiums) is rare"; ROC-AUC gives credit for ranking the many easy back-markers low, so every run looks alike, while PR-AUC looks at the top of the ranking, where the models differ; the two metrics pick different winners, so the primary one must be fixed before choosing.
+
+**Rejected:** ROC-AUC primary (every run about 0.92-0.93); F1 primary (depends on the threshold, K3).
+
+**Limit:** PR-AUC depends on the podium rate; it is compared only between sets with similar rates.
+
+#### Why K4: three metrics plus precision and recall
+
+Section 4 lists three metrics (ROC-AUC, PR-AUC, F1) and defines F1 as the "Harmonic mean of precision and recall"; the deliverables ask for "all five metrics from Section 4". We read "five" as possibly a typo, but report precision and recall anyway: they are computed for F1 at the same threshold (no extra decision), they cover both readings, and they show why an F1 is high or low (missed podiums against false alarms). **Accuracy is not used:** answering "never a podium" scores 84.7% on validation (podium rate 15.3%) and 84.5% on test. Code in the notebook ("K4, K5, K6").
+
+#### Why K5: no retraining on training + validation
+
+The question is not in the brief or the introduction: it is a common optional practice (refit on training + validation before the test). The brief describes the plain procedure: "Thresholds and hyperparameters must be selected using training and validation data only", and "Report performance on training/validation and on the unseen test set".
+
+**Proxy** (the test is not used): two extra recent seasons, measured one step earlier. Train to 2017 against train to 2019, both predicting 2020-21 (variant d):
+
+| Model | To 2017 | To 2019 | Gain (95% range) | Best-F1 threshold (2017 → 2019 model) |
+|---|---|---|---|---|
+| Logistic regression | 0.711 | 0.709 | -0.002 (-0.006 to +0.001) | 0.26 → 0.25 |
+| Gradient boosting | 0.712 | 0.728 | +0.017 (-0.001 to +0.039) | 0.21 → 0.22 |
+| Neural network | 0.719 | 0.725 | +0.004 (-0.007 to +0.016) | 0.29 → 0.32 |
+
+**Reasons:** no clear gain from two more recent seasons; the model we validate is the model we test, with nothing to assume about the threshold; simplest to explain.
+
+**Limit:** training ends 2 seasons before the test; the proxy is an analogy (the 2022 rule change makes the test era more different than 2020-21 is from 2018-19). Code in the notebook ("K4, K5, K6").
+
+#### Why K3 and D3: a threshold chosen on validation; top 3 per race reported, not forced
+
+**Where they come from:** K3 from the brief (F1 "at a chosen probability threshold"; "Thresholds and hyperparameters must be selected using training and validation data only — never the test set"). D3 from our data: every race has exactly 3 podium rows, while a threshold judges each driver alone. D3 changes nothing in the modelling table or training, only how probabilities become yes/no for F1, precision and recall.
+
+Validation 2020-21 (39 races, each with 3 podium rows), X1 models, variant (d). "Other season" = threshold chosen on 2020 and scored on 2021, and the reverse.
+
+| Rule | Logistic regression F1 | Gradient boosting F1 | Neural network F1 | Races with more than 3 predicted |
+|---|---|---|---|---|
+| Fixed 0.5 | 0.670 | 0.670 | 0.688 | 0 (predicts 92-104 of 117) |
+| Threshold, chosen on all of validation (flattering) | 0.716 | 0.708 | 0.707 | 12-28 |
+| **Threshold, chosen on the other season** | **0.704** | 0.674 | **0.700** | 10-19 |
+| Hybrid: that threshold, at most 3 per race | 0.681 | 0.670 | 0.690 | 0 |
+| Top 3 per race | 0.684 | **0.675** | 0.692 | 0 |
+
+Differences (95% range from resampled races): threshold - top 3: +0.020 (-0.019 to +0.060), -0.001 (-0.038 to +0.034), +0.007 (-0.022 to +0.042); every comparison includes 0. Chosen thresholds 2020 / 2021: logistic 0.25 / 0.26, network 0.32 / 0.34, boosting 0.22 / 0.38.
+
+**Reasons:** the brief describes a probability threshold chosen on validation; it is at least as good as the alternatives; 0.5 is too strict for a rare class; a threshold works for a single record in the prediction function, top 3 needs the whole race; capping at 3 removes real podiums (recall falls more than precision rises).
+
+**Rejected:** fixed 0.5; top 3 as the main rule; the hybrid.
+
+**Limit:** 39 races cannot separate the rules; a threshold can predict 2-6 podiums in a race; the boosting threshold moves between seasons, so its test F1 is read with its top-3 F1.
 
 ### L. Preprocessing and models
 
 | #   | Decision                                  | Options                                                                             | Why it matters                                        | Decided |
 | --- | ----------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------- | ------- |
-| L1  | How to fill missing feature values        | Median · constant · add "missing" flag                                              | Learned on train only, to avoid leakage               | open    |
-| L2  | Scale numeric features?                   | Standard · min-max · none                                                           | Needed for logistic regression and the neural network | open    |
-| L3  | How to encode IDs (driver, team, circuit) | Drop · one-hot · target encoding                                                    | Target encoding can leak the answer                   | open    |
-| L4  | Which two preprocessing orders to compare | e.g. fill-then-scale vs. scale-then-fill; filter before vs. after building features | The brief requires at least two                       | open    |
-| L5  | Baseline model                            | e.g. logistic regression                                                            | Required reference point                              | open    |
-| L6  | Second statistical model                  | Random forest · gradient boosting                                                   | At least two statistical models required              | open    |
-| L7  | Neural network library and size           | PyTorch · Keras · scikit-learn MLP; 1-2 hidden layers                               | Not installed yet                                     | open    |
+| L1  | How to fill missing feature values        | Median · constant · add "missing" flag                                              | Learned on train only, to avoid leakage               | **Fill + flag for logistic regression and the neural network; no fill for gradient boosting; learned on training rows.** Qualifying position = grid (flag `has_qualifying`; the qualifying gap was later removed, E4); driver rank without a standings row and team rank of a team without a row = last place (listed in the previous race's standings + 1); team rank before 1958 and form with no earlier race = training median; four flags (`rank_was_empty`, `team_rank_was_empty`, `first_start`, `team_first_race`). Reasoning below; code in the notebook ("L1: how to fill"). |
+| L2  | Scale numeric features?                   | Standard · min-max · none                                                           | Needed for logistic regression and the neural network | **Standard scaling (mean 0, sd 1), learned on the training rows only, for logistic regression and the neural network; gradient boosting not scaled; all 16 features scaled, flags included.** Chosen on the data (ranges and distributions), not on model scores. Reasoning below; code and figure in the notebook ("L2: scaling the features"). |
+| L3  | How to encode IDs (driver, team, circuit) | Drop · one-hot · target encoding                                                    | Target encoding can leak the answer                   | **Drop all three IDs as model inputs** (they stay in the table to build features and to name rows in part M). One test row in five has an unseen driver (21.8%) or team (19.9%); median 9 training rows per driver; strength is carried by form and standings from earlier races. Reasoning below; code in the notebook ("L3: what to do with the ID columns"). |
+| L4  | Which two preprocessing orders to compare | e.g. fill-then-scale vs. scale-then-fill; filter before vs. after building features | The brief requires at least two                       | **Experiment 2: fill → scale (ours) against scale → fill; experiment 3: filter → build driver form (ours, G8) against build driver form → filter.** Both legitimate orders (no leakage); run in step 10 on validation PR-AUC with ranges. Reasoning below; code in the notebook ("L4: which two preprocessing-order experiments"). |
+| L5  | Baseline model                            | e.g. logistic regression                                                            | Required reference point                              | **Logistic regression on the full feature set (same 16 features and rows as the other models).** Validation PR-AUC 0.706 (0.591-0.830). Two reference rows, not models: random guess 0.153 (= the podium rate) and ranking by grid slot 0.639 (logistic regression on the grid only gives exactly the same). Reasoning below; code in the notebook ("L5: the baseline"). |
+| L6  | Second statistical model                  | Random forest · gradient boosting                                                   | At least two statistical models required              | **Both random forest and gradient boosting** (four models with the baseline and the network). Untuned on validation: gradient boosting 0.713 (0.601-0.830), random forest with leaves of at least 20 rows 0.723 (0.611-0.845), difference +0.010 (-0.010 to +0.032). If time runs short, random forest is kept. Reasoning below; code in the notebook ("L6: the second statistical model"). |
+| L7  | Neural network library and size           | PyTorch · Keras · scikit-learn MLP; 1-2 hidden layers                               | Not installed yet                                     | **scikit-learn `MLPClassifier`, 1-2 hidden layers**; inputs with the L1 fill and L2 scaling; Adam and ReLU (defaults), L2 penalty `alpha`, early stopping (10% of training rows held back). Size (32, 64, 32 + 16, 64 + 32) and `alpha` tuned in L8; seed fixed (L10). Sizes 16 to 64 + 32 averaged PR-AUC 0.707-0.716 over 5 seeds; seed spread up to 0.032. Reasoning below; code in the notebook ("L7: the neural network"). |
 | L8  | How to tune settings                      | Grid search · random search · manual                                                | Validation set only                                   | open    |
 | L9  | Feature groups for the ablation           | e.g. grid · qualifying · standings · form · driver/circuit info                     | Required experiment                                   | open    |
 | L10 | Random seed                               | Fix one seed                                                                        | So results can be repeated                            | open    |
+
+#### Why L1: fill by meaning, with one flag per kind of empty value
+
+Earlier decisions left values empty on purpose (E2, F3, F4, F5, G5). Logistic regression and the network need a number in every cell (one weighted sum over all features); gradient boosting handles empty values itself. A filled constant carries no information for the model; the flag's weight learns what "unknown" means. Training rows 1950-2019 (22,570, podium rate 13.4%):
+
+| Empty value | Rows | Podium rate | Fill | Flag |
+|---|---|---|---|---|
+| Qualifying position / gap | 14,244 / 14,372 (63%) | 13.1% / 13.0% | grid / training median gap of the same grid position | `has_qualifying` |
+
+**Update:** the qualifying gap was then removed (E4 revisited: correlation 0.88 with the position, +0.009 PR-AUC, -0.003 to +0.020). The qualifying features are the position (filled with the grid) and `has_qualifying`; 16 features in all (10 base, 2 qualifying, 4 flags).
+
+| Driver rank, no standings row | 1,553 (615 first starts, 938 with earlier starts) | 3.9% | last place (listed + 1) | `rank_was_empty` |
+| Team rank, no row (0 points, 1958+) | 466 | 4.1% | last place (listed + 1) | `team_rank_was_empty` |
+| Team rank, no team championship (before 1958) | 1,182 | 14.6% | training median (6) | `team_rank_was_empty` |
+| Driver form, first start | 675 | 2.4% | training median | `first_start` |
+| Team form, the team's first race | 261 | 5.0% | training median | `team_first_race` |
+
+**Evidence for the grid:** where both exist, grid = qualifying position in 98.4% of the rows of 1994-2003 (99.8% within one place), 74.7% in 2004-13, 69.6% in 2014-24; 1,800 of the missing training rows are in 1994-2003, 12,424 before 1994.
+**Evidence for last place:** ranked drivers with 0 points have a median rank of 21 and a podium rate of 3.1%; rows with no standings row (0 points by F3) 3.9%; ranks 11-13 (around the median 12) 5.1%; ranks 21 or worse 2.5%. F5 named this fill ("listed drivers + 1").
+**Check:** validation PR-AUC with this fill 0.705 (logistic) and 0.710 (network) against 0.709 and 0.725 with X1's placeholder; differences within chance (-0.004, -0.011 to +0.004; -0.014, -0.039 to +0.010). The fill is chosen by meaning, not by score.
+
+**Gradient boosting, no fill:** it handles empty values itself; PR-AUC 0.728 as they are against 0.710 on the filled table + flags (-0.018, -0.037 to +0.004). The fill is preprocessing for the models that need it; rows and features are the same for all three models.
+
+**Rejected:** median rank (contradicts F3); worst value for form; rank 0; one flag per column; no flags.
+
+**Limits:** grid = qualifying cannot be checked before 1994 and holds less after 2003 (penalties); "last place" depends on how many drivers are listed; the flags overlap (615 rows are a first start without a rank).
+
+#### Why L2: standard scaling, chosen on the data
+
+A preprocessing step, so decided on ranges and distributions, not on model scores (the brief grades "Effect of the step on data distribution/range/values"). Logistic regression and the network use a weighted sum and penalise large weights, which treats features alike only on one scale; gradient boosting splits on thresholds, so scale does not matter for it.
+
+| Fact (training rows 1950-2019, after L1) | Value |
+|---|---|
+| Driver rank | 1 to 109, sd 12.49 (median 13, 99th percentile 70) |
+| Grid / qualifying position | 1 to 34, sd 6.82 |
+| Form columns, flags | 0 to 1, sd 0.11-0.48 |
+| Largest sd / smallest sd | 114 times |
+| Rank after min-max | 82.8% of values between 0 and 0.2 |
+| Rank after standard scaling | 96.4% within 2 sd |
+| After scaling, training | every mean 0, every sd 1 |
+| After scaling, validation (scaler never saw it) | e.g. field size mean -1.08, sd 0.23; driver finish rate mean +0.97 |
+
+**Reasons:** one scale for a fair penalty (spreads differ 114 times); readable weights (per standard deviation); standard rather than min-max because of the rank's long tail; learned on training only (no leakage).
+
+**Rejected:** min-max (squeezed by the rank's tail); no scaling (unequal penalty, unreadable weights).
+
+**Limits:** rare flags become large values after scaling (`team_first_race` 1 → 9.25); extreme ranks give up to 7.54; validation shows recent seasons differ from the training years (smaller fields, more finishes).
+
+#### Why L3: drop the IDs as model inputs
+
+| Fact (training 1950-2019; validation 2020-21; test 2022-24) | Driver | Team | Circuit |
+|---|---|---|---|
+| Distinct IDs in training (= one-hot columns) | 675 | 164 | 71 |
+| Training rows per ID, median | 9 | 36 | 181 |
+| IDs with fewer than 20 training rows | 433 | 70 | 5 |
+| Validation rows with an unseen ID | 13.6% | 15.6% | 13.1% |
+| Test rows with an unseen ID | 21.8% | 19.9% | 14.8% |
+| Test IDs / never in training | 28 / 11 | 12 / 3 | 25 / 4 |
+
+Unseen in test: drivers Latifi, Tsunoda, Schumacher (Mick), Zhou, de Vries, Piastri, Sargeant, Lawson, Bearman, Colapinto, Doohan; teams AlphaTauri, Alpine F1 Team, RB F1 Team (renamed after 2019, new IDs, J3); circuits Jeddah, Losail, Miami, Las Vegas. Every race has 3 podium rows (1,112 races; 2 have 4).
+
+**Reasons:** IDs teach nothing usable for one test row in five and rest on very few rows; strength is already in form, team form and standings, built from earlier races and valid for new drivers and renamed teams; no leakage.
+
+**Rejected:** one-hot (910 extra columns, mostly on few rows; unseen IDs become all zeros for 15-22% of test rows; renamed teams start with no history); target encoding (uses the podium to build a feature, so it leaks unless built from earlier races only, and then it duplicates the form features; no value for unseen IDs); circuit only (14.8% of test rows at new circuits; a circuit alone cannot change a race's podium count of 3; G9 already rejected circuit history).
+
+**Limit:** no fixed "this driver is special" effect beyond form and standings.
+
+#### Why L4: two order experiments that change the data in different ways
+
+The brief only says "at least two preprocessing-order experiment results" (deliverables) and "Preprocessing-order experiment(s) reported" (grading); it does not define them. Our reading: steps we really use, in their two orders, each order in its own cell. One experiment = one pair of steps; two experiments = two pairs.
+
+| Experiment | Order A (ours) | Order B | How much B changes (training rows) |
+|---|---|---|---|
+| 2 | fill, then scale | scale on real values, then fill | scaling only: driver rank mean 14.81 → 13.15, sd 12.49 → 9.36; qualifying sd 6.82 → 6.36 |
+| 3 | filter rows, then build driver form (G8) | build driver form from all result rows, then filter | values: 2,305 of 22,570 rows (10.2%) get a different last-5 window; validation 9.4%, test 12.9% |
+
+In experiment 3, order B counts a non-start (1,635: "Did not qualify" 1,012, "Did not prequalify" 330, "Withdrew" 163) as podium share 0, finish rate 0, relative place 1; team form unchanged.
+
+**Reasons:** real steps (L1, L2, G8); no leakage on either side; one experiment rescales, the other changes one row in ten.
+
+**Rejected:** fill/scale learned before the split (a leakage mistake, not an order we would use; 2020-24 is 8.4% of the rows); 3b, 3c optional; resampling order depends on D2.
+
+**Limit:** "preprocessing order" is our reading (question for the teaching assistant); the non-start values in experiment 3 are our choice.
+
+#### Why L5: logistic regression on all features as the baseline
+
+The brief: "a baseline is the simplest reasonable model or approach ... The notebook must include a statistical ML model or a shallow FFNN as baseline"; the models use "the same modeling table (same rows, same feature set)".
+
+| Validation 2020-21 (763 rows, 117 podiums) | PR-AUC (95% range) | ROC-AUC |
+|---|---|---|
+| Reference: random guess | 0.153 | 0.500 |
+| Reference: ranking by grid slot (no training) | 0.639 (0.537-0.755) | 0.907 |
+| Logistic regression, grid only | 0.639 (identical to the rule) | 0.907 |
+| **Logistic regression, all 16 features (baseline)** | **0.706** (0.591-0.830) | 0.926 |
+
+Baseline weights per sd: qualifying position -0.83, grid -0.80, team relative place -0.40, team rank -0.28, team finish rate -0.21, driver podium share +0.18, flags 0.06 or less.
+
+**Reasons:** the brief's required statistical model, and the simplest; same features as the other models; readable weights; the two references show the gain over chance and over the starting position.
+
+**Rejected:** grid-only logistic regression (= the grid rule, other feature set); the network as baseline (not the simplest).
+
+**Limits:** overlapping features share weight unpredictably (driver finish rate -0.16); weights are not causes; refitted on the final feature set after step 8.
+
+**Why the PR-AUC is not higher (follow-up in the notebook):** of the 117 drivers who started 1st-3rd in validation, 81 (69.2%) reached the podium; 30.8% of the podiums came from grid 4 or further back. The baseline's 3 favourites per race caught 81 of 117 podiums (all 3 in 15 races, 2 in 15, 1 in 6, none in 3); its 13 biggest misses are surprises (e.g. Gasly, 2020 Italian GP from grid 10; Verstappen, 2021 Russian GP from grid 20). The race sets a ceiling well below 1.0 for any pre-race model.
+
+#### Why L6: both tree models
+
+Validation 2020-21, 16 features with empty values left empty (no fill or scaling for tree models), untuned, 4 seeds:
+
+| Model | PR-AUC (95% range) | 4 seeds | PR-AUC on training |
+|---|---|---|---|
+| Gradient boosting (defaults) | 0.713 (0.601-0.830) | 0.701-0.727 | 0.656 |
+| Random forest (defaults) | 0.702 (0.591-0.820) | 0.686-0.702 | 1.000 (memorises) |
+| Random forest (leaves of at least 20 rows) | 0.723 (0.611-0.845) | 0.718-0.724 | 0.669 |
+| Baseline (L5) | 0.706 | | |
+
+Random forest (leaf 20) - gradient boosting: +0.010 (-0.010 to +0.032).
+
+**Reasons:** no measurable winner, so both are reported instead of one picked on noise; two different methods from the brief's examples; about a second per fit; covers "at least two different statistical ML models" and "at least three distinct modeling attempts".
+
+**Rejected:** one of the two only. **Fallback:** random forest if time is short (steadiest across seeds, fewest settings).
+
+**Limits:** untuned; provisional features; the final comparison comes after L8 on the final feature set.
+
+#### Why L7: scikit-learn's multilayer perceptron, 1-2 hidden layers
+
+The brief: "A neural network with a shallow architecture (roughly 1–2 hidden layers)"; "using a standard library (e.g. Keras, PyTorch) rather than writing the training loop from scratch is expected and fine".
+
+| Hidden layers (validation 2020-21, 5 seeds, untuned) | Weights | PR-AUC mean | Lowest / highest seed |
+|---|---|---|---|
+| 16 | 289 | 0.708 | 0.698 / 0.713 |
+| 32 | 577 | 0.707 | 0.691 / 0.716 |
+| 64 | 1,153 | 0.710 | 0.695 / 0.720 |
+| 32 + 16 | 1,089 | 0.715 | 0.701 / 0.732 |
+| 64 + 32 | 3,201 | 0.716 | 0.711 / 0.719 |
+
+**Why these sizes were tried (a convention, not derived from the data):** a small grid around the 16 inputs: widths from 16 (as many units as inputs) to 64 (four times as many); one layer, or two where the second is half the first (the usual funnel); powers of 2 spread the sizes evenly. Training rows per weight: 78.1 (16), 39.1 (32), 19.6 (64), 20.7 (32 + 16), 7.1 (64 + 32), so every size has enough data, and early stopping guards against memorising. The largest is no better than 32 + 16 within seed noise; 16 is dropped from tuning as the lowest, and 32, 64, 32 + 16, 64 + 32 cover both depths.
+
+**Reasons:** a standard library, installed; one pipeline for all four models; shallow as required; the size is within seed noise, so it is tuned (L8) rather than fixed now.
+
+**Rejected:** Keras or PyTorch (not installed, extra setup, no benefit for 16 features); fixing the size now.
+
+**Limits:** no dropout and fewer options than Keras/PyTorch; results vary with the seed (spread up to 0.032); teaching-assistant acceptance of scikit-learn's network is an open question.
 
 ### M. Explanations and the prediction function
 
@@ -1017,10 +1315,10 @@ The brief accepts trial-and-error evidence kept in the notebook. These choices a
 
 | #   | Question                       | Variants to compare                                                                                                                                                                                                                          | Related decision           |
 | --- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| X1 | Which seasons to train on | (a) 2003 onward with the qualifying features (8,884 rows); (b) 2003 onward without them (same rows, isolates qualifying, = X2); (c) all years without the qualifying features (24,652 rows). Same test seasons for all. Dropped for time: 1994 onward only rows with qualifying, and 1994 onward with a fill and a flag | C4 |
+| X1 | Which seasons to train on | (a) 2003 onward with the qualifying features (8,884 rows); (b) 2003 onward without them (same rows, isolates qualifying, = X2); (c) all years without the qualifying features (24,652 rows). Same test seasons for all. Dropped for time: 1994 onward only rows with qualifying, and 1994 onward with a fill and a flag | C4. **Done (introduction's split, K1; same with rolling validation as a check): variant (d), all years with the qualifying features.** |
 | X2 | Qualifying features: yes or no | X1 (a) against (b) | E5, feature-group ablation |
-| X3  | One qualifying time            | Best of `q1`-`q3` against `q1` only                                                                                                                                                                                                          | E3                         |
-| X4  | Unit of the gap                | Seconds, percent, percent capped at the 99th percentile of the training years                                                                                                                                                                | E4                         |
+| X3  | One qualifying time            | Best of `q1`-`q3` against `q1` only                                                                                                                                                                                                          | E3. **Dropped: the qualifying gap was removed (E4).** |
+| X4  | Unit of the gap                | Seconds, percent, percent capped at the 99th percentile of the training years                                                                                                                                                                | E4. **Dropped: the qualifying gap was removed (E4).** |
 | X5 | Missing qualifying | **Dropped for time:** from 2003 on only 21 rows have no qualifying row, and variant (c) of X1 does not use the qualifying features | E2 |
 | X6 | Points on a common scale | Share of the leader's points against rank in the standings (both built in step 8) | F5 |
 | X7 | Window of the recent form | Last 3, last 5, last 10 races, season so far, whole career (and the combination); the season so far resets at the season boundary, the other windows carry over (G6) | G1, G6 |
