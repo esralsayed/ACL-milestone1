@@ -1,179 +1,181 @@
-# HANDOFF PROMPT 3: continue the F1 podium project (paste this into the new conversation)
+# HANDOFF PROMPT 3 (updated 18 October 2026): continue the F1 podium project (paste this into the new conversation)
 
-You are **Claude Code inside VS Code** on a Windows machine, continuing, as the same assistant, a project that I (the team leader of a university team) have been building with Claude in earlier conversations. Do **not** change anything until you have finished Part 1 and given me the summary in Part 11. Then wait for my answer.
+You are **Claude Code inside VS Code** on a Windows machine, continuing, as the same assistant, a project that our university team has been building with Claude in earlier conversations. **Several team members work on the same files** (git authors so far: Hoor Sobh and esraa), so always check `git log` and what is on disk before you trust anything, including this prompt. Do **not** change anything until you have finished Part 1 and given the summary in Part 11. Then wait for an answer.
 
-Project folder: `C:\Users\harho\OneDrive\Desktop\ACL 2\VSCode` (git repository, remote `https://github.com/esralsayed/ACL-milestone1.git`, branch `main`).
-**Deadline: 18 October 2026, 11:59 PM.** This prompt was written on **17 October 2026: about 1.5 days remain.** Read Part 10 (time) before anything else.
+Project folder: `C:\Users\harho\OneDrive\Desktop\ACL 2\VSCode` (git, remote `https://github.com/esralsayed/ACL-milestone1.git`, branch `main`).
+**Deadline: 18 October 2026, 11:59 PM (today, when this prompt was written).** Read Part 10 (time) first.
 
-This prompt replaces `HANDOFF_PROMPT.md` and `HANDOFF_PROMPT_2.md` (older; keep them, do not follow them).
-
----
-
-## PART 1: READ FIRST (in this order, completely)
-
-1. `M1 Desc.pdf` (the brief) and `ACL formula 1 intro.pdf` (the Formula 1 introduction). The Read tool returns nothing useful for PDFs: use `/mingw64/bin/pdftotext -layout "<file>" -` (the PDFs are not UTF-8; symbols shown as "�" are `<=`, `>=` or dashes).
-2. **`F1_decisions.md`**: the most important file. Plan (10 steps), the 74 decisions (tables A to M; the last column says what was chosen, `open`, or `Deferred to the modelling phase`), a "Why <ID>" reasoning section per decision with the numbers, the list "Experiments to run in step 10" (X1-X9), and the 33 edge cases. Its tables are padded by my editor, so any script that edits a row must find it with a regex such as `^\| J4\s+\|.*$` and replace the last cell, never an exact string.
-3. **`F1_podium_prediction.ipynb`** (**316 cells**, 132 code). Too big for the Read tool: dump it with a short Python script (load the JSON, print each cell's index, type, id and full source) into the scratchpad and read **all** of it.
-4. `README.md`, `F1_project_explained.md`, `F1_data_overview.md`, `F1_table_reference.md`, `F1_EERD.md`, the two SVGs, `HANDOFF_PROMPT.md`, `HANDOFF_PROMPT_2.md`: background only (partly superseded; the notebook and `F1_decisions.md` win).
-5. `csvs/` (14 tables): look at the first rows of each yourself.
-6. `git log --oneline` and `git status`. Last known HEAD: `168dd0e last 2 in J remain` (I commit myself; never commit or push unless I ask).
-7. `.venv`: pandas 3.0.6, numpy 2.5.3, matplotlib, seaborn, scikit-learn 1.9.1, scipy, shap 0.52, lime, ipykernel. **Not installed:** statsmodels, PyTorch, TensorFlow, Keras. Run Python as `.venv/Scripts/python.exe` with `PYTHONIOENCODING=utf-8`.
-8. Your memory directory has one note: report evidence for **all years (1950-2024) first**, later periods only as labelled extras.
-
-Then verify, and tell me if anything differs: the notebook has 316 cells and ends with the cell "**Result (J3):**"; `F1_decisions.md` has 74 decisions, of which 49 decided, 3 deferred to step 10 (C4, D2, D3) and 22 open (J4, J5, K1-K6, L1-L10, M1-M4); the "Decided so far" line ends with "J1, J2, J3."
+This prompt replaces `HANDOFF_PROMPT.md`, `HANDOFF_PROMPT_2.md` and the earlier version of this file (in git history).
 
 ---
 
-## PART 2: HOW I WANT YOU TO WORK (read twice; these override politeness)
+## PART 1: READ FIRST
+
+1. `M1 Desc.pdf` (the brief) and `ACL formula 1 intro.pdf` (the introduction). Use `/mingw64/bin/pdftotext -layout "<file>" -` (not UTF-8; "�" is `<=`, `>=` or a dash).
+2. **`F1_decisions.md`** (about 1,380 lines): plan, 74 decisions in tables A-M (last column = what was chosen, `open`, or "Deferred"), a "Why <ID>" section per decision with the numbers, experiments X1-X9, 33 edge cases. Its tables are padded: edit a row with a regex such as `^\| L8\s+\|.*$` and replace the last cell.
+3. **`F1_podium_prediction.ipynb`** (**395 cells**, 172 code). Dump it with a Python script (index, type, id, number of outputs, full source) into the scratchpad and read all of it, at least cells 300-394 in full.
+4. Background only: `README.md`, `F1_project_explained.md`, `F1_data_overview.md`, `F1_table_reference.md`, `F1_EERD.md`, the two SVGs, the older handoff prompts.
+5. `git log --oneline` and `git status`. Last known HEAD: `10bddac till l7` (before it: `bde5732 updated handoff`, `168dd0e last 2 in J remain`). The team commits; never commit or push unless asked.
+6. `.venv`: pandas 3.0.6, numpy 2.5.3, matplotlib, seaborn, scikit-learn 1.9.1, scipy, shap 0.52, lime, ipykernel. **Not installed:** statsmodels, PyTorch, TensorFlow, Keras. Run `.venv/Scripts/python.exe` with `PYTHONIOENCODING=utf-8`.
+7. Memory note: report evidence for **all years (1950-2024) first**, later periods only as labelled extras.
+
+**Verify, and report anything that differs:** 395 cells, the last one is the markdown "**Result (L7, validation 2020-2021, untuned):**"; code cells with saved outputs: 129, the last one is cell 318 (J3; execution counts 71-202); **no saved outputs** in cells 240-241 (Q2 answer) and 321-393 (everything from J4 on). `F1_decisions.md`: "Decided so far" ends with "K1, ..., K6, L1, ..., L7"; open: **L8, L9, L10, M1-M4**; deferred: **D2**.
+
+---
+
+## PART 2: HOW WE WORK (these override politeness)
 
 **Professional standards**
-- Work as a professional data analyst, **not as an assistant that agrees with me.** If something I ask is weaker than an alternative, wrong, or hides a risk, say so with the evidence **before** doing it. If I insist, do it my way and state the limitation in the notebook and the md.
-- Check soundness every time: leakage (known before the race?), grain (one row per driver per race), missingness, selection bias, era effects, sample size, proof versus proxy.
-- **Every number, count, name or year you give me must come from code you ran on the CSV files** (or an output already in the notebook). **Never add up numbers by hand** (in this project I once gave wrong group totals by summing a table in my head; compute every total with code). If you correct an earlier number, say so plainly and fix every place it appears.
-- **No outside Formula 1 knowledge as evidence.** If domain knowledge is unavoidable (e.g. the nine nationality links of I1, the meaning of a status word in J1, which team became which), say it is **"not from the data"**. The introduction PDF and the brief are allowed sources: quote them.
-- Never refer to a file, column, cell, variable or decision you have not opened and verified.
-- **Every team member can be asked about any step, and "an AI tool suggested it" is not accepted.** Every claim needs a number, and I must be able to explain it simply.
-- When my words can be read two ways, **state the reading you use** (and ask if it changes the result). Use "they/them" for people whose pronouns are not stated.
-- **Give all-years evidence first** (the full cleaned table, 1950-2024), later periods only as labelled extras, unless the question itself fixes the years (Q1 uses 2003-2024 by H2; Q3 uses 2014-2024).
+- Act as a professional data analyst, not an assistant who agrees. If a request is weaker than an alternative, wrong, or hides a risk, say so with evidence **before** doing it; if the team insists, do it and state the limitation in the notebook and the md.
+- Check every step for leakage (known before the race?), grain (one row per driver per race), missingness, selection bias, era effects, sample size, proof versus proxy.
+- **Every number, count, name or year must come from code you ran on the CSV files or from a saved notebook output. Never add up numbers by hand** (this caused wrong totals once). If you correct a number, say so and fix every place it appears.
+- **No outside Formula 1 knowledge as evidence.** If unavoidable (the 9 nationality links of I1, the meaning of a status word in J1), label it **"not from the data"**. The introduction and the brief are allowed sources: quote them.
+- Never refer to a file, column, cell, variable or decision you have not opened.
+- Every team member can be asked about any step, and "an AI tool suggested it" is not accepted: every claim needs a number and a simple explanation.
+- When a request can be read two ways, **state the reading you use**. Use "they/them" for people whose pronouns are not stated.
+- **All-years evidence first**, unless the question fixes the years (Q1: 2003-2024 by H2; Q3: 2014-2024; models: the split of K1).
 
-**How we take a decision (the loop)**
-1. I say "move to the next decision" (or name one).
-2. You **explain first, step by step, in simple English, with real rows and numbers** (I often ask "explain simply" or "from the beginning": use a real example, e.g. one driver or one circuit, and a toy version if useful), and say *why* the decision exists.
-3. Options in a table with numbers for each, what each rejected option costs, and **one recommendation**.
-4. **Wait for my choice. Record a decision only after I confirm it.** Never present an undecided item as decided.
-5. When a decision picks a number (a minimum, a threshold), justify it **by trial and error on the data**: try several values in one notebook cell and show how the answer changes (as in H3 and J4). Do not pick a number by judgement and present it as data-based; if a number is a convention, say so.
-6. After I choose: add notebook cells (a markdown cell "how we came to this question", code cells with the evidence, a markdown cell with the result, the decision, the reasons, the rejected options and the limit) **unless I say "md only"**, and always edit `F1_decisions.md`: the row's last cell, the "Decided so far" line, and a "Why <ID>" section placed before the next group heading (J sections go before `### K. Split and evaluation`).
+**The decision loop**
+1. The team names the decision. 2. Explain step by step in simple English with **real rows and numbers** (a real example: one driver, one race, one team). 3. Options table with numbers, the cost of each rejected option, **one recommendation**. 4. **Wait for the choice; record only after it is confirmed.** 5. When a decision picks a number, justify it **by trial and error on the data** (several values in one notebook cell, as in H3, J4, L7); if a number is a convention, say so. 6. Then add notebook cells (markdown "How we came to this question", code with the evidence, markdown "Result" + "Decision" + reasons + rejected options + limit), unless told "md only", and always edit `F1_decisions.md` (the row's last cell, the "Decided so far" line, a "Why <ID>" section before the next group heading).
 
 **Phases**
-- In cleaning and feature definition **do not fit models and do not choose by predictive score.** Use counts, rates, descriptive statistics. Predictive comparisons are step 10 experiments (X1-X9). Earlier score checks in C1, C2, E5 and F1 are labelled "exploratory, not evidence".
-- I decide when something "belongs to the modelling phase" (I did this for D2 and D3): then record it as **Deferred to the modelling phase (step 10)** with the facts and the candidates, not as decided.
-- Raw CSV files are immutable; cleaning happens on copies. The notebook assumes no domain knowledge: every claim is first discovered by code in the notebook.
+- Cleaning and feature definition: counts and descriptive statistics only, no model scores. In step 10 (where we are now) choices are made **on validation 2020-2021 only**, with PR-AUC (primary, K2) and its 95% range from resampled races (`race_samples`). **The test seasons 2022-2024 have never been used for any choice and must not be, until the final comparison.**
+- Something the team calls "a modelling-phase question" is recorded as deferred, not decided.
+- Raw CSVs are immutable. The notebook assumes no domain knowledge: every claim is discovered by code first.
 
-**Style:** simple English, short sentences, tables, real numbers. Do not add complexity I did not ask for (I rejected a sensitivity check for J1: when I say "just take what I told you", do exactly that). Do not commit or push.
+**Style:** simple English, short sentences, tables, real numbers. No complexity that was not asked for (e.g. J1 has no sensitivity check because the team said so). Do not commit or push.
 
 ---
 
-## PART 3: TECHNICAL GOTCHAS (learned the hard way)
+## PART 3: TECHNICAL GOTCHAS
 
-1. **VS Code overwrites notebook edits** if the notebook is open with unsaved changes. Before editing, check the cell count and last cell on disk. After every write, tell me: close the notebook **without saving** (or `File: Revert File`), reopen, check the cell count, then Ctrl+S.
-2. **Edit the notebook with a Python script**: load the JSON, `assert` the expected cell count and that the last cell is the one you expect, `assert` the section is not already inserted, append cells with fresh 8-hex-character ids (`secrets.token_hex(4)`), `execution_count: None`, `outputs: []`, `metadata: {}`, write back with `json.dump(nb, f, indent=1, ensure_ascii=False)`. `NotebookEdit` fails on this notebook.
-3. **Write scripts and cell sources with the Write tool, never long bash heredocs** (heredocs broke twice in this session: quotes and `\N`). Put cell sources in a `.py` file as raw strings: `CELLS = [("markdown", r'''...'''), ("code", r'''...''')]`. Keep temporary files in the scratchpad directory given in your own system prompt.
-4. **Test every new code cell before inserting it** with a harness script (rebuild it in your scratchpad): execute all existing code cells of the notebook in order in one namespace (matplotlib backend `Agg`, `display` replaced by a function that prints `.to_string()`, `plt.show` replaced by a function that saves the figure to PNG for the new cells only, the last expression of each cell evaluated and printed), then the new cells, and **read the output before writing the interpretation**. A full run of the 316 cells takes about 35-50 seconds. **Every number in the notebook text must come from that output.** **Look at every plot as a PNG before describing it** (fix overlaps; e.g. a legend covering data).
-5. **Backslash trap:** the placeholder is the two characters `\N`. In Python source use `chr(92) + "N"`; `"\N"` is a syntax error.
-6. **pandas 3:** `groupby(...).apply(..., include_groups=False)`; text columns have dtype `str`; all raw tables are loaded as text (`text[...]`), so watch string versus integer keys. **`raceId` is not in date order** (the 2009 races have IDs 1-17): sort by `date` (`races_by_date`), never by `raceId`. Rolling windows: `s.shift(1).rolling(N, min_periods=1)` (G5: use the races available).
-7. Check bugs of the "max instead of min" kind: in this session a "first fully covered season" printed 2024 instead of 2003. Sanity-check every printed number against an earlier table.
-8. Kaggle: `DATA_DIR = Path("csvs")` and the relative image `F1_relationships.svg` must work on Kaggle (path variable, uploaded file or PNG).
-9. New code cells have **no saved outputs** (cells 254 onward were never run in Jupyter). A full Restart-and-Run-All in Jupyter is still to do.
+1. **VS Code overwrites notebook edits** if the notebook is open with unsaved changes. Before editing check the cell count and the last cell on disk; after every write tell the user: close the notebook without saving (or `File: Revert File`), reopen, check the cell count, then Ctrl+S. Teammates may edit too: check `git status` first.
+2. **Edit the notebook with a Python script:** load the JSON, `assert` the expected count and last cell, `assert` the new section is not already there, append cells with fresh ids (`secrets.token_hex(4)`), `execution_count: None`, `outputs: []`, `metadata: {}`; write with `json.dump(nb, f, indent=1, ensure_ascii=False)`. `NotebookEdit` fails on this notebook.
+3. **Write scripts and cell sources with the Write tool, never long bash heredocs** (quotes and `\N` break them). Cell sources as raw strings in a `.py` file: `CELLS = [("markdown", r'''...'''), ("code", r'''...''')]`. Temporary files go in your scratchpad directory.
+4. **Test every new code cell before inserting it** with a harness (rebuild it): run all existing code cells in order in one namespace (backend `Agg`, `display` prints `.to_string()`, `plt.show` saves PNGs for the new cells only, the last expression of each cell is printed), then the new cells; read the output before writing any interpretation. **Running all 395 cells now includes model fits and bootstraps: measure the time** (the 316-cell version took about 35-50 s). Look at every plot as a PNG before describing it.
+5. `\N` in Python source: `chr(92) + "N"`.
+6. pandas 3: `groupby(...).apply(..., include_groups=False)`; raw tables are text (`text[...]`). **`raceId` is not in date order**: sort by `date`. Rolling windows: `s.shift(1).rolling(N, min_periods=1)`.
+7. Sanity-check printed numbers (a `max`/`min` slip once printed 2024 instead of 2003).
+8. **Names redefined by later cells** (the last definition wins in a Run-All; do not rely on the earlier one): `best_f1_threshold` (cell 351 returns `(threshold, best F1)`, cell 355 returns the threshold only), `BASE_FEATURES` (cell 336: with `field_size`; cell 381: `base_podium_chance` instead), `QUALI_FEATURES` (cell 336: position, gap, flag; cell 367: position and flag only), `FEATURES_L1`, `VARIANTS`, `MODELS`, `trial`, `rows`, `both`, `summary`, `ranked`, `zero`, `table`, `changed`, `started`, `season_of`, `starters`, `colors`, `order`. **The X1, K2-K6, K3/D3 and L1 results were computed with the qualifying gap and field size; L5-L7 with the final 16 features.**
+9. Kaggle: `DATA_DIR = Path("csvs")` and the relative image `F1_relationships.svg` must work there (path variable, uploaded file or PNG).
+10. Cells 240-241 and 321-393 have never been run in Jupyter. A full Restart-and-Run-All is still to do.
 
 ---
 
 ## PART 4: THE PROJECT
 
-**Milestone 1: Formula 1 podium prediction.** Kaggle/Ergast data 1950-2024, 14 linked CSV tables in `csvs/`. **Unit:** one driver in one race. **Target:** `positionOrder <= 3`. **Cutoff:** after qualifying, before the race (the race's own result, points, laps, status, pit stops and standings are leakage; earlier races are allowed).
+**Milestone 1: Formula 1 podium prediction.** Kaggle/Ergast data 1950-2024, 14 CSV tables in `csvs/`. **Unit:** one driver in one race. **Target:** `positionOrder <= 3`. **Cutoff:** after qualifying, before the race.
 
-**Brief checklist:** EDA before and after cleaning with plots; clean `\N`, semantic typing (dates, lap times to seconds); exactly one row per `(raceId, driverId)`; primary and foreign keys checked; three data-engineering questions with multi-hop joins, a plot, an answer and a short note on grain, missingness and cutoff (Q1 front row to podium by circuit, before/after 2014, grid vs qualifying; Q2 home advantage controlling for starting position; Q3 mechanical-retirement rate by constructor, 2014-2021 vs 2022-2024); feature selection justified with evidence and a leakage-safe form feature; a justified train/validation/test split (the introduction suggests train <= 2019, validation 2020-2021, test >= 2022); at least two statistical models plus a shallow neural network (1-2 hidden layers), a baseline, at least three distinct modeling attempts; metrics ROC-AUC, PR-AUC, F1 (the deliverables say "all five metrics": add precision and recall), on train/validation and on the unseen test set, thresholds and hyperparameters from train/validation only; feature-group ablation and at least two preprocessing-order experiments; XAI: permutation importance and SHAP (global), LIME and/or local SHAP (local), stating that importance is not causation (brief section 6: "A feature being important to the model is not proof that it causes podium finishes"); an inference function on a complete and a partially missing record; a **PDF report** (Q1-Q3 answers with figures, selected features and why each is valid pre-race, limitations incl. "historical qualifying-coverage drift, era sensitivity"); a run-all notebook. **Submission:** public Kaggle notebook link + GitHub repo link + PDF report via `https://forms.gle/esDxHsvfzffYHVAZ9`.
+**Brief checklist (what must be in the notebook and report):** EDA **before and after** cleaning with plots; `\N` cleaned, semantic typing (dates, lap times in seconds); one row per `(raceId, driverId)`; keys checked; Q1-Q3 with multi-hop joins, plot, answer, grain/missingness/cutoff note; features justified with evidence, a leakage-safe form feature, "plotting the effect of the features", "effect of the step on data distribution/range/values"; a justified split; at least two statistical models + a shallow neural network (1-2 hidden layers), a baseline, at least three distinct modelling attempts; ROC-AUC, PR-AUC, F1 (+ precision, recall, K4) on train/validation **and** the unseen test; thresholds and hyperparameters from train/validation only; feature-group ablation; at least two preprocessing-order experiments; XAI: permutation importance + SHAP (global), LIME and/or local SHAP (local), "importance is not causation"; an inference function on a complete and a partially missing record; **PDF report** (Q1-Q3 answers with figures, selected features and why each is valid pre-race, limitations incl. "historical qualifying-coverage drift, era sensitivity"); run-all notebook. **Submission:** public Kaggle notebook link + GitHub repo link + PDF via `https://forms.gle/esDxHsvfzffYHVAZ9`.
 
-**Notebook outline (316 cells, cell index of each section):** loading as text (0-4); missing values per table (5-53); formats (54-97); keys and links (98-104); duplicates, B1-B4 (105-155); EDA, 6 analyses + summary (156-183); "Cleaning: which rows stay" C1, C2, C3, C6, C7, "Applying the filters" (184-210); text labels A5 (211-218); home race I1, I2, I5 (219-231); Q2 control I4 (232-238); E6 (239-244); standings F1-F3 (245-252); F4 (253-257); G2 (258-262); G4 (263-265); G5 (266-270); **G7 (271-276)**; **G9 (277-280)**; **Question 1: H1 (281-287), H2 (288-292), H3 (293-297), answer (298-302)**; **Question 3: J1 (303-307), J2 (308-311), J3 (312-315)**. Decisions with md entries but no notebook cells: C4, D2, D3 (deferred), E2, E5, F5, G1, G3, G6, G8, G10.
+**Notebook outline (395 cells; cell index):** loading (0-4); missing values (5-53); formats (54-97); keys (98-104); duplicates B1-B4 (105-155); EDA before cleaning, 6 analyses (156-183); row filters C1, C2, C3, C6, C7, "Applying the filters" (184-210); labels A5 (211-218); home race I1, I2, I5 with table `q2` (219-231); Q2 control I4 (232-238); **Q2 answer (239-242)**; E6 (243-248); standings F1-F3 (249-256); F4 (257-261); G2 (262-266); G4 (267-269); G5 (270-274); G7 (275-280); G9 (281-284); **Q1**: H1 (285-291), H2 (292-296), H3 (297-301), answer (302-306); **Q3**: J1 (307-311), J2 (312-315), J3 (316-319), **J4 (320-325), J5 (326-329), answer (330-334)**; **modelling**: K1/C4/X1 (335-341), rolling-validation check (342-345), K2 (346-348), K4/K5/K6 (349-353), K3/D3 (354-356), L1 (357-364), E4 revisited, gap removed (365-368), L2 (369-373), L3 (374-376), L4 (377-379), G10 updated, `base_podium_chance` (380-382), L5 baseline (383-385) + follow-up (386-388), L6 (389-391), L7 (392-394).
 
-**Key variables defined by notebook cells** (later cells depend on them; run earlier cells first): `text` (raw tables as strings), `results_one_row` (26,668 rows, after B1), `eda`, `ERA_BINS`/`ERA_LABELS`, `with_q`, `status_name` (statusId → text), **`clean_rows`** (24,652 rows after all row filters; the model table and the source of all form history, G8), `drivers_clean`/`circuits_clean`/`constructors_clean` (A5), `nationality_to_country`, **`q2`** (Q2 table: `results_one_row` without Indy, `grid > 0`, 24,652 rows = the same pairs as `clean_rows`), `home` (built from `q2`), `races_by_date` and `previous_race` (F1), `rows_f`, `team_standings`, `rows_t`, `form_rows`, `team_races`, `changes`, `history`, **`form_measures`** (G7: per driver-race `podium`, `finished`, `relative_place`, plus last-5 versions), **`circuit_history`** (G9), **`q1`** (Q1 table: results after B1 without Indy 500, 26,287 rows, with `quali_position`, `front_row_grid`, `front_row_quali`, `period`), `race_q`, `season_cov`, **`wilson(k, n)`** (95% Wilson interval, defined in H2 query 3), `q1_recent` (2003+), `circuit_races`, `attempts` (H3 trial table), `q1_rates`, `wide`, **`q3`** (Q3 table: results after B1, 2014-2024, 4,626 rows, with `status`, `period` ("2014-21"/"2022-24"), `finished`, `mechanical` (J1), `positionText`, `start` (J2)), `status_table`, `mapping`, `MECHANICAL`, `NOT_MECHANICAL`, `starts` (q3 rows with `start`), `by_team`. **Names reused by several cells** (do not rely on them): `rows`, `table`, `changed`, `zero`, `started`, `summary`, `season_of`, `starters`.
-
----
-
-## PART 5: THE DATA PIPELINE (all numbers verified by code)
-
-- Raw: seasons 75, circuits 77, drivers 861, constructors 212, status 139, races 1,125 (1950-2024), results 26,759, qualifying 10,494 (from 1994; every race has qualifying from 2003), sprint_results 360 (18 races, 2021-2024), driver_standings 34,863, constructor_standings 13,391 and constructor_results 12,625 (from 1958), lap_times 589,081, pit_stops 11,371. 14 primary keys and 23 foreign keys valid. `\N` the only placeholder; blank cells only in `qualifying.q2`/`q3`.
-- **Rows:** 26,759 → **B1** 26,668 (podium 3,379) → **C1** remove 1,635 `grid = 0` rows → 25,033 → **C2** nothing removed → **C3** remove Indianapolis 500 (381 rows, 35 podiums) → **24,652 rows, 3,344 podiums (13.6%)** → C6, C7 nothing removed.
-- From 2003: 8,884 rows, 1,284 podiums, 428 races (every race has exactly 3 podium rows; over all years 1,112 races have 3 and 2 have 4, shared cars of 1951 and 1955).
-- `has_qualifying`: 10,407 True, 14,245 False (E2). Split counts with the introduction's split and a 2003+ window: train 6,802 rows (963 podiums), validation 763 (117), test 1,319 (204).
+**Key variables** (run earlier cells first): `text`, `results_one_row` (26,668), `status_name`, **`clean_rows`** (24,652; the model rows and the source of all form history, G8), `drivers_clean`/`circuits_clean`/`constructors_clean`, `q2` and `home` (Q2), `races_by_date`, `previous_race`, **`rows_f`** (`rank_before`, `points_before`, `previous_race`), **`rows_t`** (`team_rank_before`, `state`), **`form_measures`** (per row `podium`, `relative_place`, `finished`, `earlier_starts`, last-5 driver form), `q1`, `wilson(k, n)`, `q3` (with `mechanical`, `start`), `starts`, `team_rates`, `MIN_STARTS` (34), `q3_rates`, `sprint_q3`.
+**Modelling variables:** **`x1_table`** (all 24,652 rows of `clean_rows`, all years incl. the test seasons, with the features), `team_form`, `quali_times`/`lap_seconds` (q-times in seconds), **`BASE_FEATURES`** (10: `grid`, `base_podium_chance`, `rank_before`, `team_rank_before`, `podium_last5`, `relative_place_last5`, `finished_last5`, `team_podium_last5`, `team_relative_place_last5`, `team_finished_last5`), **`QUALI_FEATURES`** (`quali_position`, `has_qualifying`), **`FLAGS`** (`rank_was_empty`, `team_rank_was_empty`, `first_start`, `team_first_race`), **`FEATURES_L1`** (the 16 features), `logistic()`, **`race_samples(rows, n=1000, seed=42)`** (resampled races for 95% ranges), `validation`, **`y_val`**, `val_pred`, `VARIANT_D`, `best_f1_threshold`, `l1` (x1_table + `previous_race`, `points_before`, `state`, `earlier_starts`), **`fill_empty(rows, train_rows)`** (L1), **`l1_filled`**, **`l1_trn`** (≤ 2019, filled), **`l1_val`** (2020-21, filled), `drivers_listed`, `teams_listed`, `scaler`, **`baseline`** (fitted logistic regression pipeline), **`tree_table`/`tree_trn`/`tree_val`** (empty values left empty + flags, for the tree models), `l6_models`.
 
 ---
 
-## PART 6: DECISIONS (49 decided, 3 deferred, 22 open; details and numbers in `F1_decisions.md`)
+## PART 5: THE DATA (all verified by code)
+
+- Raw: races 1,125 (1950-2024), results 26,759, qualifying 10,494 (from 1994; every race has it from 2003), sprint_results 360 (18 sprints, 2021-2024), driver_standings 34,863, constructor_standings 13,391 (from 1958). 14 primary keys, 23 foreign keys valid.
+- Rows: 26,759 → B1 26,668 → C1 (−1,635 `grid = 0`) → C3 (−381 Indy 500) → **24,652 rows, 3,344 podiums (13.6%)**; 1,112 races with exactly 3 podium rows, 2 with 4 (shared cars of 1951 and 1955).
+- **Split (K1):** training 1950-2019 (22,570 rows, podium rate 13.4%), validation 2020-2021 (763 rows, 39 races, 117 podiums, 15.3%), test 2022-2024 (1,319 rows, 68 races, 204 podiums). A validation PR-AUC has a 95% range about 0.24 wide.
+
+---
+
+## PART 6: DECISIONS (see the md for numbers; 66 decided, D2 deferred, L8-L10 and M1-M4 open)
 
 | ID | Decision |
 |---|---|
-| A1-A4 | Missing = `\N` and blank; lap times to seconds; mixed-format time columns not used; keep lists (A4 incomplete for Q2/Q3, which also use `circuits.country`, `drivers.nationality`, `status.status`, `positionText` letter W) |
-| A5 | 3 label corrections by dictionary (`'Argentinian '`→`Argentine`, `United States`→`USA`, `&amp;`→`&`) on copies |
-| B1-B4 | Keep the lowest `resultId` row of a repeated driver-race pair; grid and team from that row; both sharers of a place keep it; no renumbering |
-| C1 | Remove every `grid = 0` row (incl. 72 pit-lane starts 2015-2024, 0 podiums) |
-| C2 | Keep rows with a grid slot and 0 laps (966) |
-| C3 | Remove the Indianapolis 500 |
-| C5 | All three questions start from `results_one_row` without Indy, each with its own filter: **Q1** no further filter (keeps the 2 qualifying-front-row drivers who started from the pit lane); **Q2** `grid > 0` (needs a grid position to control for it; table `q2`, 24,652 rows, the same pairs as `clean_rows`, answer unchanged); **Q3** `results_one_row` 2014-2024, starts = not `W` (keeps the 72 pit-lane starts, 8 mechanical). Models: `clean_rows` + training window (C4). Reasons in "Why C5" in the md |
-| C6, C7 | Keep disqualified rows; sprint results not used as features |
+| A1-A5 | `\N` and blank = missing; lap times in seconds; mixed-format columns not used; keep lists; 3 label corrections |
+| B1-B4 | Lowest `resultId` row per driver-race; grid/team from it; sharers both keep a place; no renumbering |
+| C1-C3, C6, C7 | Remove `grid = 0` (1,635); keep grid slot + 0 laps; remove Indy 500; keep disqualified; sprints not features |
+| **C4** | **By X1: the models train on all seasons 1950-2019 with the qualifying features** (variant d; empty + `has_qualifying`) |
+| C5 | Q1-Q3 start from `results_one_row` without Indy (Q1 no filter; Q2 `grid > 0` = `clean_rows` pairs; Q3 2014-24, starts = not `W`); models use `clean_rows` |
 | D1 | Target `positionOrder <= 3` |
-| E1-E6 | No `grid = 0` rows (prediction function: given grid 0 → last slot); qualifying left empty + `has_qualifying`; best of `q1`-`q3` in seconds; gap to the fastest (percent favoured, unit/cap in X4); grid and qualifying position as two feature groups; team = `results.constructorId` |
-| F1-F6 | Previous race = latest earlier date (round 1 takes last season's final standings); no standings row = 0 points; team standings empty before 1958; rank and share of the leader's points built, compared in X6; use `position`, not `positionText` |
-| G1 | Five windows: last 3, 5, 10 starts, season so far, career (earlier races only, `min_periods=1`) |
-| G2-G5 | Driver form and team form as two groups; follow `constructorId` (renames reset); team form = current team; no earlier start = empty |
-| **G6** | Decided by experiment X7: last-N and career windows carry over the season boundary, season so far resets; no extra reset versions |
-| **G7** | Three measures of earlier races: **podium share**, **relative place** (rank of `positionOrder` among the race's starters ÷ number of starters; ranking needed because 67 rows would exceed 1), **finish rate** (`Finished` or `+n Laps`). Points rejected (raw and normalized: points table changes by era, repeats the place, corr -0.90/-0.93). Same measures for driver and team form |
-| **G8** | Form history computed from **`clean_rows` only** (non-starts and the 72 pit-lane starts are not in the history; 314 prediction rows from 2015 reach one race further back) |
-| **G9** | No circuit-history feature (61.7% of rows would rest on 0-2 earlier starts at the circuit; 30.3% none; corr 0.64 with career form) |
-| **G10** | **Field size** (starters in the race) built as a feature; year and era decided by experiment X9 |
-| **H1** | Q1 with **both** front rows (grid 1-2 and qualifying 1-2), side by side |
-| **H2** | "Before 2014" = **2003-2013** against 2014-2024 (from 2003 every race has qualifying; earlier seasons would add races unevenly, 17%-71% of a circuit's 1994-2002 races, from lower-converting years) |
-| **H3** | A circuit is ranked with **at least 5 races in each period** (14 circuits; trial and error: from 5 on the rank correlation settles) |
-| I1-I5 | Nationality→country table of 25 links (9 "not from the data"); dual nationality = home in either; `USA` merged; home effect inside grid bands, Mantel-Haenszel odds ratio **0.93 (0.78-1.07)**; drivers with no circuit country stay as "never home" |
-| **J1** | Explicit mapping of the 57 non-finish statuses of 2014-2024: **47 mechanical (416 rows), 10 not** (Collision, Accident, Collision damage, Spun off, Illness, Disqualified, Excluded, Withdrew, Out of fuel, Retired; 385 rows). Wheel, Puncture, Tyre, Undertray, Front/Rear wing, Wheel nut, Damage, Technical, Vibrations, Debris, Seat are mechanical (my decision). **No sensitivity check** (my decision) |
-| **J2** | A race start = **`positionText` is not `W`** (withdrawn): 4,598 starts, 401 mechanical (2014-21: 321/3,246 = 9.89%; 2022-24: 80/1,352 = 5.92%). Complete for every row; separates "failed on lap 1" (R) from "failed before the start" (W) |
-| **J3** | One team = one `constructorId` (no ID changes at the 2021/2022 boundary; 11 IDs in both periods) |
-| **Deferred** | **C4** (seasons to model, X1), **D2** (class weights/resampling), **D3** (top 3 per race or threshold) |
+| D2 | **Deferred** to step 10: nothing / class weights / resampling |
+| **D3** | **Not forced to 3 per race; "top 3 per race" reported as an extra F1 column** |
+| E1-E3, E5, E6 | As before (no `grid = 0` rows; qualifying empty + `has_qualifying`; grid and qualifying position two groups; team = `results.constructorId`) |
+| **E4** | **Revisited: the qualifying gap is removed** (rank corr 0.88 with the position; +0.009 PR-AUC, −0.003 to +0.020). X3 and X4 dropped |
+| F1-F6 | Previous race by date; no standings row = 0 points; team standings empty before 1958; rank and share of leader built (X6); use `position` |
+| G1-G9 | 5 windows (only **last 5** built so far), driver + team form, follow `constructorId`, current team, empty without history, G6 by X7, G7 podium share + relative place + finish rate, G8 history from `clean_rows`, G9 no circuit history |
+| **G10** | **`base_podium_chance` = 3 ÷ starters replaces field size** (podium rate = 3 ÷ starters within 0.17 points in every era); year/era by X9 |
+| H1-H3 | Q1: both front rows; 2003-13 vs 2014-24; ≥ 5 races per period (14 circuits) |
+| I1-I5 | Q2: 25 nationality links; dual = either; `USA` merged; grid bands + Mantel-Haenszel; "never home" rows stay |
+| J1-J3 | Q3: 47 mechanical statuses (416 rows); start = not `W`; one team = one `constructorId` |
+| **J4** | **A team is ranked with ≥ 34 starts in the period** (one full season, 2 × 17 races); top 3 identical for minimums 34-75 |
+| **J5** | **Sprint failures not counted** (60 / 299 sprint starts, 1 / 3 mechanical; no top 3 changes) |
+| **K1** | **The introduction's split:** train ≤ 2019, validation 2020-21, test 2022-24; every validation score with its 95% range; rolling validation 2018-21 was a check only |
+| **K2** | **PR-AUC primary, ROC-AUC secondary** (12 X1 runs: PR-AUC 0.657-0.728, ROC-AUC 0.914-0.930; they pick different winners) |
+| **K3** | **Per model, the best-F1 threshold on validation, used unchanged on test** (0.22-0.38) |
+| **K4** | **ROC-AUC, PR-AUC, F1 + precision and recall** (accuracy not used: "never a podium" = 84.7%) |
+| **K5** | **No retraining on train + validation** |
+| **K6** | **2020 is a normal season** |
+| **L1** | **Fill + flag for logistic regression and the network, no fill for the tree models**, learned on training rows: qualifying position = grid; missing driver/team rank = last place (listed + 1), team rank before 1958 = training median; form with no earlier race = training median; 4 flags |
+| **L2** | **Standard scaling on training rows** (logistic regression, network); trees not scaled |
+| **L3** | **IDs dropped as model inputs** (21.8% of test rows have an unseen driver, 19.9% an unseen team) |
+| **L4** | **Experiment 2: fill → scale vs scale → fill; experiment 3: filter → driver form (G8) vs driver form → filter** (10.2% of training rows change) |
+| **L5** | **Baseline = logistic regression on all 16 features:** validation PR-AUC 0.706 (0.591-0.830); references: random 0.153, grid ranking 0.639 |
+| **L6** | **Both random forest (leaves ≥ 20 rows) 0.723 and gradient boosting 0.713** (untuned; difference within chance); random forest kept if time is short |
+| **L7** | **scikit-learn `MLPClassifier`, 1-2 hidden layers**, Adam/ReLU, `alpha`, early stopping; sizes 32, 64, 32+16, 64+32 left to L8 (all 0.707-0.716, seed spread up to 0.032) |
 
 ---
 
-## PART 7: EXPERIMENTS FOR STEP 10 (in `F1_decisions.md`)
+## PART 7: EXPERIMENTS (state)
 
-X1 seasons: (a) 2003+ with qualifying features, (b) 2003+ without (= X2), (c) all years without qualifying features; X3 best of `q1`-`q3` vs `q1` only; X4 gap unit and cap; **X5 dropped** (only 21 rows from 2003 lack qualifying); X6 rank vs share of leader's points; X7 form window (and G6); X8 lineage table (optional, cut first); **X9 year/era: (a) field size only, (b) + era categories, (c) + year number** (read on validation: the test era 2022-24 has 0 training rows under the introduction's split). Plus D2 and D3, the feature-group ablation (groups: grid, qualifying, standings, driver form, team form, field size) and two preprocessing-order experiments.
+| # | State |
+|---|---|
+| X1 | **Done** (variant d) |
+| X2 | Covered by X1 and the ablation |
+| X3, X4, X5 | **Dropped** (gap removed; X5 for time) |
+| X6 | **Not run:** rank vs share of the leader's points (only rank is built) |
+| X7 | **Not run:** form windows (only last 5 is built; last 3, 10, season so far, career not built) |
+| X8 | Optional (cut first) |
+| X9 | **Not run:** (a) base chance only, (b) + era, (c) + year |
+| L4 exp. 2 and 3 | **Not run** (defined in L4) |
+| Ablation | **Not run** (groups = L9, open) |
+| D2 | **Not run** (class weights could be part of tuning, L8) |
 
 ---
 
 ## PART 8: EDGE CASES
 
-The 33 edge cases are in `F1_decisions.md` ("Edge Cases to Handle", some counts are raw, before B1). Found in this session, add them to that table when convenient:
-- `positionOrder` still counts rows removed by C1, so `positionOrder / starters` exceeds 1 in 67 rows (52 races): G7 ranks among the starters first.
-- The 72 pit-lane starts (`grid = 0`, laps > 0) are real races but not in `clean_rows` (C1, G8); Q3 counts them (J2).
-- `laps = 0` cannot tell "failed on lap 1" from "failed before the start": `positionText` R/W can (J2). 28 W rows in 2014-2024, 15 with a mechanical status; Räikkönen 2017 Malaysia is R with grid 0 and 0 laps.
-- Sprint weekends 2021-2023: 7 of the 38 rows that qualified on the front row but did not start there (the sprint can set the Sunday grid, C7).
-- Some races have only one grid front-row starter in the table (e.g. Interlagos 2014-24: 19 front-row starts in 10 races).
-- Same venue under two circuit IDs (Zeltweg/Red Bull Ring 2.2 km, the two Las Vegas circuits 0.2 km, Montjuïc/Pedralbes 3.9 km): none falls inside 2003-2024 with two IDs.
-- Constructor IDs: Sauber's ID 15 covers 2014-2018 and again 2024; renames inside the Q3 periods split teams into pieces of 44-48 starts; timing pairs are ambiguous (Force India pairs with Racing Point and Alfa Romeo).
-- Status labelling shifts between Q3 periods: Collision damage 5.3% of non-finishes in 2014-21, 13.9% in 2022-24; Brakes 7.4% and 2.1%. `Retired` (no reason) is 6.3% / 6.2%.
-- Seasons 2014-2024 have 17 (2020) to 24 (2024) races; Caterham (33 starts) and Marussia (31) raced part of 2014 only.
+The md lists 33 (some counts raw, before B1). Found later, not yet in the md table: `positionOrder` still counts rows removed by C1 (67 rows would have relative place above 1: G7 ranks among the starters); the 72 pit-lane starts are real races but not in `clean_rows` (C1, G8) and are counted in Q3 (J2); `laps = 0` cannot separate "failed on lap 1" (R) from "failed before the start" (W): 28 W rows in 2014-24, 15 with a mechanical status; Räikkönen 2017 Malaysia is R with grid 0 and 0 laps; 7 of the 38 qualifying-front-row drivers who did not start there are sprint weekends; Interlagos 2014-24 has 19 grid front-row starts in 10 races; same venue under two circuit IDs (none inside 2003-2024); Sauber's ID 15 covers 2014-2018 and 2024; Q3 status labelling shifts between periods (Collision damage 5.3% vs 13.9% of non-finishes); seasons 2014-24 have 17-24 races; Caterham (33) and Marussia (31) raced part of 2014; a sprint row has the letter `N` (not in the introduction's list) and a Haas sprint row is classified 20th with a car-part status; 1,553 training rows have no standings rank (615 first starts); 23 rows (round 1 of 1950) have no previous standings at all.
+
+**Small inconsistencies to fix in the md when convenient:** the plan table still says steps 7, 8 and 10 are "To do"; the "Deferred to step 10" line still lists E3/E4 (both dropped); the L1 row still describes a gap fill (the gap was removed).
 
 ---
 
-## PART 9: WHAT IS LEFT
+## PART 9: WHAT IS LEFT (in the order I recommend)
 
-**J4 (in progress, not confirmed):** minimum starts for a team to be ranked in Q3. My recommendation: **B, at least 34 starts in the period** (one full season with two cars in the shortest season: 17 races × 2). Evidence already computed (put it in the notebook after I confirm): per-team rates with Wilson ranges, races per season 2014-2024 (17-24), trial top 3 under minimums 0/34-75/80/100: 2014-21 top 3 with 34-75 = Lotus F1 20.0% (75 starts), Toro Rosso 16.5%, Renault 14.6% (Caterham 21.2% from 33 starts tops it with no minimum); 2022-24 = Alfa Romeo 12.5%, Alpine 10.4%, AlphaTauri 8.0% for any minimum up to 88. Ask me to confirm.
+**Must do (brief requirements):**
+1. **L8, L9, L10** (open): tuning on validation PR-AUC (small grid per model: random forest `min_samples_leaf`, `max_features`; gradient boosting `learning_rate`, `max_leaf_nodes`, `min_samples_leaf`; network sizes 32/64/32+16/64+32 × `alpha`; logistic regression `C`; class weight none/balanced if D2 is folded in); ablation groups (suggested: grid; qualifying = position + `has_qualifying`; standings = driver and team rank + their flags; driver form; team form; base podium chance); seed 42 (already used everywhere; report the seed spread of the network).
+2. **Final model comparison:** 4 models (logistic baseline, random forest, gradient boosting, network) + the two reference rows, on **training, validation and test**: PR-AUC, ROC-AUC, F1, precision, recall (threshold from validation, K3), top-3-per-race F1 (D3), 95% ranges by race. Plot the PR curves.
+3. **Feature-group ablation** (L9) and **the two preprocessing-order experiments** (L4), each attempt in its own cell.
+4. **XAI (M1-M4 open):** permutation importance and SHAP on the best model (global), one local explanation (local SHAP waterfall, and LIME if time), interpreted; state that importance is not causation.
+5. **Inference function:** input one record (suggested: a dictionary), apply the L1 fill and L2 scaling learned on training, return a probability and yes/no at the K3 threshold; a given grid of 0 → last slot (E1); demonstrated on a complete record and one with missing qualifying (and no history).
+6. **EDA after cleaning** (brief: "this step should be done both before and after the cleaning"): repeat key plots on `clean_rows` / the modelling table with before/after counts. **Not done yet.** Also a short visible "semantic typing" summary (dates via `races_by_date`, lap times via `lap_seconds`).
+7. **Restart-and-Run-All** in Jupyter (time it), fix errors, save outputs.
+8. **PDF report**, **Kaggle** (public notebook, data paths, SVG), **GitHub** (team commits), **submission form**.
 
-**J5:** count sprint failures in Q3? (raw `sprint_results`: 360 rows, Finished 340, Retired 10, Accident 3, Collision damage 3, Vibrations 1, Electrical 1, Brakes 1, Exhaust 1; recompute by period with the J1 mapping and the J2 start rule.) Then **answer Q3**: table of rates with ranges per team and period, a plot like Q1's, the answer, the grain/missingness/cutoff note, limits.
+**Optional (cut first, in this order):** X8, X6, X9 (c), X7 beyond last 5, LIME (keep local SHAP), random forest or gradient boosting (L6: keep random forest), D2 as a separate experiment (fold into tuning).
 
-**Q2:** I4 is done; add the figure (home vs away podium rate inside the grid bands) and the written answer.
-
-**Step 7 (cleaning) to do:** apply A1-A4 (typed clean tables, q-times in seconds, dates), build the clean modeling table (one row per driver-race, `has_qualifying`), before/after counts, **EDA after cleaning** with plots (the brief requires before and after).
-
-**Step 8 (features):** leakage-safe (earlier races only: sort by date, group by driver or team, shift by one race): grid; qualifying position and gap (E4, both units); standings before the race (rank and share, F1-F5); the five form windows × three measures (G7) for driver (from `clean_rows`, G8) and team (current team, all its cars); field size (G10); `has_qualifying`.
-
-**Step 10:** decisions K1-K6 (split; recommended the introduction's split with bootstrap intervals by race, PR-AUC main, ROC-AUC second, threshold on validation, add precision and recall, retrain on train+validation optional, 2020 normal), L1-L10 (fill learned on train, scaling, IDs dropped, two preprocessing orders, logistic regression baseline, gradient boosting or random forest, scikit-learn `MLPClassifier` with 1-2 hidden layers, tuning on validation, ablation groups, seed 42), M1-M4 (explain the best model, one local example, dictionary input, a record with no qualifying); D2, D3; experiments X1-X9; ablation; XAI; inference function; model comparison table (validation and test, five metrics, intervals by race).
-
-**Final:** Restart-and-Run-All (check time), Kaggle upload (path variable, SVG), GitHub (I commit), PDF report, submission form.
-
-**Questions I may send to the teaching assistant:** three or five metrics; is the introduction's split binding; LIME required; is scikit-learn's MLP acceptable; what counts as the baseline; may the model table cover only 2003+; how "mechanical retirement" is counted; what "preprocessing-order experiments" means. Our defaults are already what we do.
+**Questions the team may send to the teaching assistant:** three or five metrics; is the introduction's split binding; LIME required; is scikit-learn's MLP acceptable; what "preprocessing-order experiments" means. Our defaults are already what we do.
 
 ---
 
-## PART 10: TIME (this changes how you must work)
+## PART 10: TIME
 
-About **1.5 days** remain and the build (clean table, features, models, XAI, inference, report, Kaggle, run-all) has **not started**. Therefore:
-- Finish J4 and J5 and the Q3 answer quickly (data already computed for J4), then Q2's figure and answer (short).
-- Then **build**: step 7 and step 8 first (the models need them), then K/L/M **as one batch with defaults** (I confirm or change the batch), then the models and the experiments.
-- Tell me early what will not fit and propose cuts, in this order: X8, X3, X4 cap, X9 variant (c), some X7 windows, LIME (keep local SHAP). Never cut a brief requirement (three models incl. NN, baseline, five metrics on validation and test, ablation, two preprocessing orders, permutation importance + SHAP + one local explanation, inference function on complete and partial record, report, run-all).
-- Teammates can take sections in parallel (Q2 answer, the report, Kaggle): offer self-contained cells or text.
+The deadline is **tonight, 18 October 2026, 11:59 PM**. The models are only partly built (untuned), and the test results, ablation, preprocessing experiments, XAI, inference function, EDA after cleaning, run-all, report and Kaggle are not done. Therefore:
+- Propose **one batch** for L8-L10 and M1-M4 with defaults, get it confirmed, and build.
+- Prefer a lean, complete notebook over extra experiments: every brief requirement once, with ranges and a short interpretation.
+- Check the total Run-All time before adding heavy loops (bootstraps, seeds, grids): keep `race_samples` at 1000 or fewer and the tuning grids small.
+- Teammates can work in parallel on the report and Kaggle: offer them text and figures.
 
 ---
 
-## PART 11: WHAT I WANT FROM YOU NOW
+## PART 11: WHAT TO DO NOW
 
-1. Do Part 1 completely, and run the verification.
-2. Reply with: (a) a short summary in your own words of where we are, (b) decisions taken, deferred and open, (c) anything in the files that contradicts this prompt or looks wrong, (d) what you would cut or reorder given the time, (e) any decision already taken that you think is weak, with data.
-3. Then ask me to confirm **J4** (recommendation B, 34 starts) and propose **J5** with data. Do not edit the notebook, `F1_decisions.md` or git until I answer.
+1. Do Part 1 and the verification.
+2. Reply with: (a) a short summary of where we are; (b) decisions taken, deferred and open; (c) anything in the files that contradicts this prompt or looks wrong; (d) a time plan for the rest of today with cuts; (e) any decision already taken that looks weak, with data.
+3. Then propose the batch L8, L9, L10, M1-M4 (and D2) with defaults, and wait.
