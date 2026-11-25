@@ -10,3 +10,6 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+# Secrets (each person keeps their own copy, never pushed)
+.env
+config.txt
