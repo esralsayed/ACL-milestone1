@@ -10,3 +10,7 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+config.txt
+csvs/
+__pycache__/
